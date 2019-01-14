@@ -5,7 +5,7 @@
 keyword     main|if|else|while|for|"else if"|break|void
 datatype    int|char|struct|float|double
 operators   "<"|">"|"<="|">="|"="|"=="|"+"|"-"|"++"|"--"|"*"|"/"|"%"|"~"|"!"|"||"|"&&"
-slcomment   "//"(.)*\n
+slcomment   "//"(.)*
 mlcomment   "/*"(.|\n)*"*/"
 preprocdir  "#include"|"#define"|"#"|"#if"|"#else"|"#elif"|"#ifndef"|"#ifdef"|"#pragma"|"#line"|"#undef"|"#error"
 
