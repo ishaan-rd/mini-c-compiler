@@ -20,6 +20,8 @@ preprocdir  "#include"|"#define"|"#"|"#if"|"#else"|"#elif"|"#ifndef"|"#ifdef"|"#
 {mlcomment}     { printf ("Multi-line Comment %s\n",yytext); }
 {identifier}    { printf ("Identifier %s\n",yytext);}
 ";"             { printf ("Semicolon \n");}
+[+-]?{digit}+  { printf ("Integer %s\n",yytext);}
+[+-]?{digit}*"."{digit}+ { printf ("Float %s\n",yytext);}
 %%
 
 int yywrap() { return 1; }
