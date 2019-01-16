@@ -8,6 +8,10 @@ void main() {
     int c=a%b;
 
     printf ("a mod b = %d\n", c);
+    /*sjkdl
+    /*
+    */
+    */
 
     return;
 }
