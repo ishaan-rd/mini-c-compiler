@@ -1,13 +1,13 @@
 %{
 #include <stdio.h>
 void yyerror(char *s);
-int line=1;
+int lineno=0;
 %}
 
 keyword     main|if|else|while|for|"else if"|break|void
 datatype    int|char|struct|float|double
 operators   "<"|">"|"<="|">="|"="|"=="|"+"|"-"|"++"|"--"|"*"|"/"|"%"|"~"|"!"|"||"|"&&"
-identifier  [a-zA-Z][a-zA-z0-9_]*
+identifier  [a-zA-Z_][a-zA-z0-9_]*
 digit       [0-9]
 slcomment   "//"(.)*
 mlcomment   "/*"(.|\n)*"*/"
