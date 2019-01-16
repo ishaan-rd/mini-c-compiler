@@ -32,8 +32,3 @@ void main() {
     printf ("Enter input\n ");
     yylex();
 }
-
-/*
-1. Error for nested and unmatched comments
-2. "" in string
-*/
