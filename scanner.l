@@ -31,7 +31,7 @@ XOR         "^"
 identifier  {alpha}({alpha}|{digit}|und)*
 slcomment   "//"(.)*$
 mlcomment   "/*"(.|\n)*"*/"
-mlcommenterr "/*"(.|\n)*
+mlcommenterr ("/*"(.|\n)* | "*/")
 string      \"([^"])*\"
 preprocdir  "#include"|"#define"|"#"|"#if"|"#else"|"#elif"|"#ifndef"|"#ifdef"|"#pragma"|"#line"|"#undef"|"#error"
 
@@ -39,8 +39,8 @@ preprocdir  "#include"|"#define"|"#"|"#if"|"#else"|"#elif"|"#ifndef"|"#ifdef"|"#
 %%
 [ \n\t]+        {;}
 {skip}          {;}
-{mlcomment}     { printf ("Multi Line Comment %s\n\n",yytext); }   
 [;]             { printf ("Semicolon\n\n"); }
+{mlcomment}     { printf ("Multi Line Comment %s\n\n",yytext); }
 {preprocdir}    { printf ("Preprocessor: %s\n\n",yytext); }
 {keyword}       { printf ("Keyword: %s\n\n",yytext); }
 {datatype}      { printf ("Datatype %s\n\n",yytext); }
@@ -49,7 +49,6 @@ preprocdir  "#include"|"#define"|"#"|"#if"|"#else"|"#elif"|"#ifndef"|"#ifdef"|"#
 [+-]?{digit}{1,5}   { printf ("Integer %s\n\n",yytext); }
 [+-]?{digit}*"."{digit}{1,6} { printf ("Float %s\n\n",yytext); }
 {string}        { printf ("String %s\n\n",yytext); }
-
 %%
 
 
