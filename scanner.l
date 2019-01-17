@@ -30,7 +30,7 @@ BitAND      "&"
 XOR         "^"
 identifier  {alpha}({alpha}|{digit}|und)*
 slcomment   "//"(.)*$
-mlcomment   "/*"(.|\n)*"*/"
+mlcomment   "/*"([^*]|[\n]|(\*+([^*/]|[\n])))*\**"*/"
 mlcommenterr "/*"(.|\n)*
 string      \"([^"])*\"
 preprocdir  "#include"|"#define"|"#"|"#if"|"#else"|"#elif"|"#ifndef"|"#ifdef"|"#pragma"|"#line"|"#undef"|"#error"
