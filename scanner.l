@@ -82,7 +82,6 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 "["				                        {printf("paranthesis    : %s\n",yytext);}
 "]"				                        {printf("paranthesis    : %s\n",yytext);}
 .                                 {printf("%d: Illegal character %s\n",yylineno,yytext);}
-
 %%
 
 int yywrap() { return 1; }
