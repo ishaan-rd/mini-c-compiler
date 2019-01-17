@@ -48,6 +48,25 @@ preprocdir  "#include"|"#define"|"#"|"#if"|"#else"|"#elif"|"#ifndef"|"#ifdef"|"#
 [+-]?{digit}{1,5}   { printf ("Integer %s\n\n",yytext); }
 [+-]?{digit}*"."{digit}{1,6} { printf ("Float %s\n\n",yytext); }
 {string}        { printf ("String %s\n\n",yytext); }
+{LT}            { printf ("Less than\n"); }
+{GT}            { printf ("Greater than\n"); }
+{LE}            { printf ("Less than or equal\n"); }
+{GE}            { printf ("Greater than or equal\n"); }
+{Assign}        { printf ("Assignment operator\n"); }
+{EqualTo}       { printf ("Equal to operator\n"); }
+{Addition}      { printf ("Addition operator\n"); }
+{Minus}         { printf ("Subtraction operator\n"); }
+{Division}      { printf ("Division operator\n"); }
+{Multiplication} { printf ("Multiplication operator\n"); }
+{Inc}           { printf ("Increment operator\n"); }
+{Dec}           { printf ("Decrement operator\n"); }
+{Mod}           { printf ("Modulus operator\n"); }
+{Not}           { printf ("Invert operator\n"); }
+{LogOR}         { printf ("Logical OR\n"); }
+{LogAnd}        { printf ("Logical AND\n"); }
+{BitOR}         { printf ("Bitwise OR\n"); }
+{BitAND}        { printf ("Bitwise AND\n"); }
+{XOR}           { printf ("XOR operator\n"); }
 %%
 
 
