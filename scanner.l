@@ -25,16 +25,19 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 "signed"                          {printf("datatype       : %s\n",yytext);}
 "unsigned"                        {printf("datatype       : %s\n",yytext);}
 "char"                            {printf("datatype       : %s\n",yytext);}
-"for"                             {printf("keyword        : %s\n",yytext);}
+"for"                             {printf("looping        : %s\n",yytext);}
+"while"                           {printf("looping        : %s\n",yytext);}
 "break"                           {printf("keyword        : %s\n",yytext);}
 "continue"                        {printf("keyword        : %s\n",yytext);}
-"if"                              {printf("keyword        : %s\n",yytext);}
-"else"                            {printf("keyword        : %s\n",yytext);}
+"if"                              {printf("conditional    : %s\n",yytext);}
+"else"                            {printf("conditional    : %s\n",yytext);}
 "return"                          {printf("keyword        : %s\n",yytext);}
 {identifier}                      {printf("identifier     : %s\n", yytext);}
 {ws}                              ;
-[+\-]?[0][x|X]{hex}               {printf("literal        : %s\n", yytext);}
-[+\-]?{digit}                     {printf("literal        : %s\n", yytext);}
+[+\-]?[0][x|X]{hex}               {printf("hex literal    : %s\n", yytext);}
+[+\-]?{digit}{1,5}                {printf("int literal    : %s\n", yytext);}
+[+\-]?{digit}{1,5}"."{digit}{1,6} {printf("float literal  : %s\n", yytext);}
+['].[']                           {printf("char literal   : %s\n", yytext);}
 "/*"                              {cmnt_strt = lineno; BEGIN CMNT;}
 <CMNT>.|{ws}                      ;
 <CMNT>\n                          {lineno++;}
@@ -73,13 +76,13 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 "<"				                        {printf("operator       : %s\n",yytext);}
 ">"				                        {printf("operator       : %s\n",yytext);}
 "="				                        {printf("operator       : %s\n",yytext);}
-","				                        {printf("comma          : %s\n",yytext);}
-"{"			                          {printf("paranthesis    : %s\n",yytext);}  
-"}"			                          {printf("paranthesis    : %s\n",yytext);}
-"("				                        {printf("paranthesis    : %s\n",yytext);}
-")"				                        {printf("paranthesis    : %s\n",yytext);}
-"["				                        {printf("paranthesis    : %s\n",yytext);}
-"]"				                        {printf("paranthesis    : %s\n",yytext);}
+","				                        {printf("Punctuator     : %s\n",yytext);}
+"{"			                          {printf("Punctuator     : %s\n",yytext);}  
+"}"			                          {printf("Punctuator     : %s\n",yytext);}
+"("				                        {printf("Punctuator     : %s\n",yytext);}
+")"				                        {printf("Punctuator     : %s\n",yytext);}
+"["				                        {printf("Punctuator     : %s\n",yytext);}
+"]"				                        {printf("Punctuator     : %s\n",yytext);}
 .                                 {printf("ERROR %d : Illegal character %s\n",lineno,yytext);yyterminate();}
 %%
 
