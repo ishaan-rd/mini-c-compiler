@@ -1,8 +1,7 @@
 %{
-
 #include <stdlib.h>
 #include <stdio.h>
-int cmnt_strt = 0, yylineno = 0;
+int cmnt_strt = 0, lineno = 0;
 %}
 
 letter [a-zA-Z]
@@ -36,27 +35,27 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 {ws}                              ;
 [+\-]?[0][x|X]{hex}               {printf("literal        : %s\n", yytext);}
 [+\-]?{digit}                     {printf("literal        : %s\n", yytext);}
-"/*"                              {cmnt_strt = yylineno; BEGIN CMNT;}
+"/*"                              {cmnt_strt = lineno; BEGIN CMNT;}
 <CMNT>.|{ws}                      ;
-<CMNT>\n                          {yylineno++;}
+<CMNT>\n                          {lineno++;}
 <CMNT>"*/"                        {BEGIN INITIAL;}
-<CMNT>"/*"                        {printf("%d: Invalid comments\n",yylineno);}
+<CMNT>"/*"                        {printf("%d: Invalid comments\n",lineno);}
 <CMNT><<EOF>>                     {printf("%d: Invalid comments\n", cmnt_strt); yyterminate();}
 ^"#"[ ]*"include"                 {printf("preprocessor   : #include\n"); BEGIN INCLUDE;}
 <INCLUDE>"<"[^<>\n]+">"           {printf("header file    : %s\n",yytext);}
 <INCLUDE>{ws}                     ;
 <INCLUDE>\"[^"\n]+\"              {printf("%s\n",yytext);}
-<INCLUDE>\n                       {yylineno++; BEGIN INITIAL;}
-<INCLUDE>.                        {printf("%d: header name not valid \n",yylineno);}
+<INCLUDE>\n                       {lineno++; BEGIN INITIAL;}
+<INCLUDE>.                        {printf("%d: header name not valid \n",lineno);}
 ^"#"[ ]*"define"                  {printf("preprocessor   : #define\n");BEGIN DEFINE;}
 <DEFINE>{ws}                      ;
 <DEFINE>{identifier}              {printf("macro id       : %s\n", yytext);}
 <DEFINE>{constant}                {printf("macro constant : %s\n", yytext); BEGIN INITIAL;}
 "//".*                            ;
 \"(\\.|[^"\\])*\"                 {printf("string\n");}
-\"[^\"\n]*$                       {printf("%d: Unterminated string %s\n",yylineno,yytext);}
-{digit}+({letter}|_)+	            {printf("%d: Illegal identifier name %s\n",yylineno,yytext);}
-\n                                {yylineno++;}
+\"[^\"\n]*$                       {printf("%d: Unterminated string %s\n",lineno,yytext);}
+{digit}+({letter}|_)+	            {printf("%d: Illegal identifier name %s\n",lineno,yytext);}
+\n                                {lineno++;}
 "--"			                        {printf("operator       : %s\n",yytext);}
 "++"			                        {printf("operator       : %s\n",yytext);}
 "->"			                        {printf("operator       : %s\n",yytext);}
@@ -81,7 +80,7 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 ")"				                        {printf("paranthesis    : %s\n",yytext);}
 "["				                        {printf("paranthesis    : %s\n",yytext);}
 "]"				                        {printf("paranthesis    : %s\n",yytext);}
-.                                 {printf("%d: Illegal character %s\n",yylineno,yytext);}
+.                                 {printf("%d: Illegal character %s\n",lineno,yytext);}
 %%
 
 int yywrap() { return 1; }
