@@ -38,10 +38,10 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 [+\-]?{digit}{1,5}                {printf("int literal    : %s\n", yytext);}
 [+\-]?{digit}{1,5}"."{digit}{1,6} {printf("float literal  : %s\n", yytext);}
 ['].[']                           {printf("char literal   : %s\n", yytext);}
-"/*"                              {cmnt_strt = lineno; BEGIN CMNT;}
+"/*"                              {printf("Multiline comment start at lineno %d\n", lineno); cmnt_strt = lineno; BEGIN CMNT;}
 <CMNT>.|{ws}                      ;
 <CMNT>\n                          {lineno++;}
-<CMNT>"*/"                        {BEGIN INITIAL;}
+<CMNT>"*/"                        {printf("Multiline comment end at lineno %d\n", lineno); BEGIN INITIAL;}
 <CMNT><<EOF>>                     {printf("ERROR %d : Invalid comments\n", cmnt_strt); yyterminate();}
 ^"#"[ ]*"include"                 {printf("preprocessor   : #include\n"); BEGIN INCLUDE;}
 <INCLUDE>"<"[^<>\n]+">"           {printf("header file    : %s\n",yytext);}
@@ -53,9 +53,9 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 <DEFINE>{ws}                      ;
 <DEFINE>{identifier}              {printf("macro id       : %s\n", yytext);}
 <DEFINE>{constant}                {printf("macro constant : %s\n", yytext); BEGIN INITIAL;}
-"//".*                            ;
+"//".*                            {printf("Single line comment at lineno %d\n", lineno);};
 "*/"                              {printf("ERROR %d : Invalid comments\n",lineno); yyterminate();}
-\"(\\.|[^"\\])*\"                 {printf("string\n");}
+\"(\\.|[^"\\])*\"                 {printf("string         : %s\n",yytext);}
 \"[^\"\n]*$                       {printf("ERROR %d : Unterminated string %s\n",lineno,yytext);yyterminate();}
 {digit}+({letter}|_)+	            {printf("ERROR %d : Illegal identifier name %s\n",lineno,yytext);yyterminate();}
 \n                                {lineno++;}
