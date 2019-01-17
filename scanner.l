@@ -1,9 +1,9 @@
 %{
 #include <stdio.h>
-int openMComment = 0, closedMComment = 0;
+
+int lineNo = 0;
 %}
 
-skip        "<"|">"|"("|")"|"."|"{"|"}"|","
 alpha       [a-zA-Z]
 digit       [0-9]
 und         "_"
@@ -30,21 +30,20 @@ BitAND      "&"
 XOR         "^"
 identifier  {alpha}({alpha}|{digit}|und)*
 slcomment   "//"(.)*$
-mlcomment   "/*"(.|\n)*"*/"
-mlcommenterr ("/*"(.|\n)* | "*/")
+mlcomment   "/*"([^*]|[\n]|(\*+([^*/]|[\n])))*\**"*/"
+mlcommenterr ("/*"(.|\n)*|.*"*/")
 string      \"([^"])*\"
 preprocdir  "#include"|"#define"|"#"|"#if"|"#else"|"#elif"|"#ifndef"|"#ifdef"|"#pragma"|"#line"|"#undef"|"#error"
 
-
 %%
+{mlcomment}     { printf ("Multi Line Comment \n"); }
+{mlcommenterr}  { printf("Multiline error \n");}
 [ \n\t]+        {;}
-{skip}          {;}
 [;]             { printf ("Semicolon\n\n"); }
-{mlcomment}     { printf ("Multi Line Comment %s\n\n",yytext); }
-{preprocdir}    { printf ("Preprocessor: %s\n\n",yytext); }
+{slcomment}     { printf ("Single Line Comment %s\n\n",yytext); }
+{preprocdir}.*$    { printf ("Preprocessor: %s\n\n",yytext); }
 {keyword}       { printf ("Keyword: %s\n\n",yytext); }
 {datatype}      { printf ("Datatype %s\n\n",yytext); }
-{slcomment}     { printf ("Single Line Comment %s\n\n",yytext); }
 {identifier}    { printf ("Identifier %s\n\n",yytext); }
 [+-]?{digit}{1,5}   { printf ("Integer %s\n\n",yytext); }
 [+-]?{digit}*"."{digit}{1,6} { printf ("Float %s\n\n",yytext); }
