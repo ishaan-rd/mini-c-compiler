@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define MAX 100
+#define MAX 100*/
 
 void main() {
     int a=5;
@@ -11,7 +11,15 @@ void main() {
     /*sjkdl
     /*
     */
+    
 
+   /** alskdfj
+    * laksdfj
+     */
+   makfjsl
+   /*kdsjfkl
+   kjdfks
+   */
 
     return;
 }
