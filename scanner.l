@@ -57,11 +57,3 @@ void main() {
     printf ("Enter input\n");
     yylex();
 }
-<<<<<<< HEAD
-
-/*
-1. Error for nested and unmatched comments
-2. "" in string
-*/
-=======
->>>>>>> 3627157e8119d4b154ebc59317ae3a3eb41943e8
