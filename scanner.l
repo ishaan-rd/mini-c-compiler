@@ -39,22 +39,22 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 <CMNT>.|{ws}                      ;
 <CMNT>\n                          {lineno++;}
 <CMNT>"*/"                        {BEGIN INITIAL;}
-<CMNT>"/*"                        {printf("%d: Invalid comments\n",lineno);}
-<CMNT><<EOF>>                     {printf("%d: Invalid comments\n", cmnt_strt); yyterminate();}
+<CMNT>"/*"                        {printf("ERROR %d : Invalid comments\n",lineno); yyterminate();}
+<CMNT><<EOF>>                     {printf("ERROR %d : Invalid comments\n", cmnt_strt); yyterminate();}
 ^"#"[ ]*"include"                 {printf("preprocessor   : #include\n"); BEGIN INCLUDE;}
 <INCLUDE>"<"[^<>\n]+">"           {printf("header file    : %s\n",yytext);}
 <INCLUDE>{ws}                     ;
 <INCLUDE>\"[^"\n]+\"              {printf("%s\n",yytext);}
 <INCLUDE>\n                       {lineno++; BEGIN INITIAL;}
-<INCLUDE>.                        {printf("%d: header name not valid \n",lineno);}
+<INCLUDE>.                        {printf("ERROR %d : header name not valid \n",lineno);yyterminate();}
 ^"#"[ ]*"define"                  {printf("preprocessor   : #define\n");BEGIN DEFINE;}
 <DEFINE>{ws}                      ;
 <DEFINE>{identifier}              {printf("macro id       : %s\n", yytext);}
 <DEFINE>{constant}                {printf("macro constant : %s\n", yytext); BEGIN INITIAL;}
 "//".*                            ;
 \"(\\.|[^"\\])*\"                 {printf("string\n");}
-\"[^\"\n]*$                       {printf("%d: Unterminated string %s\n",lineno,yytext);}
-{digit}+({letter}|_)+	            {printf("%d: Illegal identifier name %s\n",lineno,yytext);}
+\"[^\"\n]*$                       {printf("ERROR %d : Unterminated string %s\n",lineno,yytext);yyterminate();}
+{digit}+({letter}|_)+	            {printf("ERROR %d : Illegal identifier name %s\n",lineno,yytext);yyterminate();}
 \n                                {lineno++;}
 "--"			                        {printf("operator       : %s\n",yytext);}
 "++"			                        {printf("operator       : %s\n",yytext);}
@@ -80,7 +80,7 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 ")"				                        {printf("paranthesis    : %s\n",yytext);}
 "["				                        {printf("paranthesis    : %s\n",yytext);}
 "]"				                        {printf("paranthesis    : %s\n",yytext);}
-.                                 {printf("%d: Illegal character %s\n",lineno,yytext);}
+.                                 {printf("ERROR %d : Illegal character %s\n",lineno,yytext);yyterminate();}
 %%
 
 int yywrap() { return 1; }
