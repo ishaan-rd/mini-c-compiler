@@ -30,10 +30,10 @@ BitAND      "&"
 XOR         "^"
 identifier  {alpha}({alpha}|{digit}|und)*
 slcomment   "//"(.)*$
+mlcomment   "/*"([^*]|[\n]|(\*+([^*/]|[\n])))*\**"*/"
+mlcommenterr ("/*"(.|\n)*|.*"*/")
 string      \"([^"])*\"
 preprocdir  "#include"|"#define"|"#"|"#if"|"#else"|"#elif"|"#ifndef"|"#ifdef"|"#pragma"|"#line"|"#undef"|"#error"
-mlcomment   "/*"([^*]|\*+[^*/])*\*+"/"
-mlcommenterr ("/*"(.|\n)*|.*"*/")
 
 %%
 {mlcomment}     { printf ("Multi Line Comment %s\n\n",yytext); }
