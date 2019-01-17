@@ -10,10 +10,10 @@ operators   "<"|">"|"<="|">="|"="|"=="|"+"|"-"|"++"|"--"|"*"|"/"|"%"|"~"|"!"|"||
 identifier  [a-zA-Z_][a-zA-z0-9_]*
 digit       [0-9]
 slcomment   "//"(.)*
-mlcomment   "/*"(.|\n)*"*/"
-string      "\""[^"]*"\""
+string      \"([^"]*|("\"")*)\"
 preprocdir  "#include"|"#define"|"#"|"#if"|"#else"|"#elif"|"#ifndef"|"#ifdef"|"#pragma"|"#line"|"#undef"|"#error"
 line        [\n]
+
 %%
 {line}          {lineNo++;}
 {preprocdir}    { printf ("Preprocessor: %s\n",yytext); }
@@ -34,16 +34,17 @@ line        [\n]
 {string}        { printf ("String %s\n",yytext);}
 [ \t]            {;}
 %%
-void yyerror(char* s)
-{
+
+void yyerror(char* s) {
     printf("%s",s);
 }
+
 int yywrap() { return 1; }
 
 void main() {
-    printf ("Enter input\n ");
+    printf ("Enter input\n");
     yylex();
-    printf("lines %d",lineNo);
+    printf("lines %d\n",lineNo);
     if(comment>0)
     printf("Error : Comment opened at Line Number %d not closed\n", lastCommentOpen);
     if(comment<0)
