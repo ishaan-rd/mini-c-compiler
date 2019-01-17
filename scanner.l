@@ -1,7 +1,7 @@
 %{
 #include <stdlib.h>
 #include <stdio.h>
-int cmnt_strt = 0, lineno = 0;
+int cmnt_strt = 0, lineno = 1;
 %}
 
 letter [a-zA-Z]
@@ -39,7 +39,6 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 <CMNT>.|{ws}                      ;
 <CMNT>\n                          {lineno++;}
 <CMNT>"*/"                        {BEGIN INITIAL;}
-<CMNT>"/*"                        {printf("ERROR %d : Invalid comments\n",lineno); yyterminate();}
 <CMNT><<EOF>>                     {printf("ERROR %d : Invalid comments\n", cmnt_strt); yyterminate();}
 ^"#"[ ]*"include"                 {printf("preprocessor   : #include\n"); BEGIN INCLUDE;}
 <INCLUDE>"<"[^<>\n]+">"           {printf("header file    : %s\n",yytext);}
@@ -52,6 +51,7 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 <DEFINE>{identifier}              {printf("macro id       : %s\n", yytext);}
 <DEFINE>{constant}                {printf("macro constant : %s\n", yytext); BEGIN INITIAL;}
 "//".*                            ;
+"*/"                              {printf("ERROR %d : Invalid comments\n",lineno); yyterminate();}
 \"(\\.|[^"\\])*\"                 {printf("string\n");}
 \"[^\"\n]*$                       {printf("ERROR %d : Unterminated string %s\n",lineno,yytext);yyterminate();}
 {digit}+({letter}|_)+	            {printf("ERROR %d : Illegal identifier name %s\n",lineno,yytext);yyterminate();}
