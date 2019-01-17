@@ -1,12 +1,13 @@
 %{
 #include <stdio.h>
+int openMComment = 0, closedMComment = 0;
 %}
 
-
+skip        "<"|">"|"("|")"|"."|"{"|"}"|","
 alpha       [a-zA-Z]
 digit       [0-9]
 und         "_"
-keyword     main|if|else|while|for|"else if"|break|void
+keyword     main|if|else|while|for|"else if"|break|void|return
 datatype    int|char|struct|float|double
 LT          "<"
 GT          ">"
@@ -28,24 +29,26 @@ LogAND      "&&"
 BitAND      "&"
 XOR         "^"
 identifier  {alpha}({alpha}|{digit}|und)*
-slcomment   "//"(.)*[\n]$
-mlcomment   \/\*(.|\n)*\*\/
+slcomment   "//"(.)*$
+mlcomment   "/*"(.|\n)*"*/"
+mlcommenterr "/*"(.|\n)*
 string      \"([^"])*\"
 preprocdir  "#include"|"#define"|"#"|"#if"|"#else"|"#elif"|"#ifndef"|"#ifdef"|"#pragma"|"#line"|"#undef"|"#error"
 
 
 %%
-
-[;]             { printf ("Semicolon\n"); }
-{preprocdir}    { printf ("Preprocessor: %s\n",yytext); }
-{keyword}       { printf ("Keyword: %s\n",yytext); }
-{datatype}      { printf ("Datatype %s\n",yytext); }
-{slcomment}     { printf ("Single Line Comment %s\n",yytext); }
-{mlcomment}     { printf ("Multi-line Comment \n"); }
-{identifier}    { printf ("Identifier %s\n",yytext); }
-[+-]?{digit}{1,5}   { printf ("Integer %s\n",yytext); }
-[+-]?{digit}*"."{digit}{1,6} { printf ("Float %s\n",yytext); }
-{string}        { printf ("String %s\n",yytext); }
+[ \n\t]+        {;}
+{skip}          {;}
+{mlcomment}     { printf ("Multi Line Comment %s\n\n",yytext); }   
+[;]             { printf ("Semicolon\n\n"); }
+{preprocdir}    { printf ("Preprocessor: %s\n\n",yytext); }
+{keyword}       { printf ("Keyword: %s\n\n",yytext); }
+{datatype}      { printf ("Datatype %s\n\n",yytext); }
+{slcomment}     { printf ("Single Line Comment %s\n\n",yytext); }
+{identifier}    { printf ("Identifier %s\n\n",yytext); }
+[+-]?{digit}{1,5}   { printf ("Integer %s\n\n",yytext); }
+[+-]?{digit}*"."{digit}{1,6} { printf ("Float %s\n\n",yytext); }
+{string}        { printf ("String %s\n\n",yytext); }
 
 %%
 
@@ -54,6 +57,7 @@ int yywrap() { return 1; }
 
 
 void main() {
-    printf ("Enter input\n");
+    extern FILE *yyin, *yyout;
+    yyin = fopen("test.c", "r"); 
     yylex();
 }
