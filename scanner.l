@@ -31,7 +31,7 @@ XOR         "^"
 identifier  {alpha}({alpha}|{digit}|und)*
 slcomment   "//"(.)*$
 mlcomment   "/*"([^*]|[\n]|(\*+([^*/]|[\n])))*\**"*/"
-mlcommenterr ("/*"(.|\n)*|.*"*/")
+mlcommenterr "/*"([^*/]|\n)*"*/"([^/*])*"*/"
 string      \"([^"])*\"
 preprocdir  "#include"|"#define"|"#"|"#if"|"#else"|"#elif"|"#ifndef"|"#ifdef"|"#pragma"|"#line"|"#undef"|"#error"
 
@@ -63,7 +63,7 @@ preprocdir  "#include"|"#define"|"#"|"#if"|"#else"|"#elif"|"#ifndef"|"#ifdef"|"#
 {Mod}           { printf ("Modulus operator\n"); }
 {Not}           { printf ("Invert operator\n"); }
 {LogOR}         { printf ("Logical OR\n"); }
-{LogAnd}        { printf ("Logical AND\n"); }
+{LogAND}        { printf ("Logical AND\n"); }
 {BitOR}         { printf ("Bitwise OR\n"); }
 {BitAND}        { printf ("Bitwise AND\n"); }
 {XOR}           { printf ("XOR operator\n"); }
