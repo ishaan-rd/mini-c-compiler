@@ -36,7 +36,8 @@ string      \"([^"])*\"
 preprocdir  "#include"|"#define"|"#"|"#if"|"#else"|"#elif"|"#ifndef"|"#ifdef"|"#pragma"|"#line"|"#undef"|"#error"
 
 %%
-{mlcomment}     { printf ("Multi Line Comment %s\n\n",yytext); }
+{mlcomment}     { printf ("Multi Line Comment \n"); }
+{mlcommenterr}  { printf("Multiline error \n");}
 [ \n\t]+        {;}
 [;]             { printf ("Semicolon\n\n"); }
 {slcomment}     { printf ("Single Line Comment %s\n\n",yytext); }
