@@ -1,9 +1,7 @@
 %{
 #include <stdlib.h>
 #include <stdio.h>
-#include <conio.h>
-#define RED 4
-int cmnt_strt = 0, lineno = 1;
+int cmnt_strt = 0, lineno = 0;
 %}
 
 letter [a-zA-Z]
@@ -41,7 +39,8 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 <CMNT>.|{ws}                      ;
 <CMNT>\n                          {lineno++;}
 <CMNT>"*/"                        {BEGIN INITIAL;}
-<CMNT><<EOF>>                     {textcolor(RED); cprintf("%d: Invalid comment\n", cmnt_strt); yyterminate();}
+<CMNT>"/*"                        {printf("%d: Invalid comments\n",lineno);}
+<CMNT><<EOF>>                     {printf("%d: Invalid comments\n", cmnt_strt); yyterminate();}
 ^"#"[ ]*"include"                 {printf("preprocessor   : #include\n"); BEGIN INCLUDE;}
 <INCLUDE>"<"[^<>\n]+">"           {printf("header file    : %s\n",yytext);}
 <INCLUDE>{ws}                     ;
@@ -54,10 +53,9 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 <DEFINE>{constant}                {printf("macro constant : %s\n", yytext); BEGIN INITIAL;}
 "//".*                            ;
 \"(\\.|[^"\\])*\"                 {printf("string\n");}
-\"[^\"\n]*$                       {textcolor(RED); cprintf("%d: Unterminated string %s\n",lineno,yytext);}
-{digit}+({letter}|_)+	            {textcolor(RED); cprintf("%d: Illegal identifier name %s\n",lineno,yytext);}
+\"[^\"\n]*$                       {printf("%d: Unterminated string %s\n",lineno,yytext);}
+{digit}+({letter}|_)+	            {printf("%d: Illegal identifier name %s\n",lineno,yytext);}
 \n                                {lineno++;}
-"*/"                              {textcolor(RED); cprintf("%d: Invalid comment\n",lineno);}
 "--"			                        {printf("operator       : %s\n",yytext);}
 "++"			                        {printf("operator       : %s\n",yytext);}
 "->"			                        {printf("operator       : %s\n",yytext);}
