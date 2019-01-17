@@ -6,7 +6,7 @@ int lineNo=0,comment=0,lastCommentClosed=1,lastCommentOpen=1;
 
 keyword     main|if|else|while|for|"else if"|break|void
 datatype    int|char|struct|float|double
-operators   "<"|">"|"<="|">="|"="|"=="|"+"|"-"|"++"|"--"|"*"|"/"|"%"|"~"|"!"|"||"|"&&"
+operators   "<"|">"|"<="|">="|"="|"=="|"+"|"-"|"++"|"--"|"*"|"/"|"%"|"~"|"!"|"||"|"&&"|"|"|"&"|"^"
 identifier  [a-zA-Z_][a-zA-z0-9_]*
 digit       [0-9]
 slcomment   "//"(.)*
@@ -28,7 +28,7 @@ line        [\n]
         lastCommentClosed = lineNo;}
 {operators}     { printf ("Operator %s\n",yytext); }
 {identifier}    { printf ("Identifier %s\n",yytext);}
-";"             { printf ("Semicolon \n");}
+[;]             { printf ("Semicolon \n");}
 [+-]?{digit}{1,5}   { printf ("Integer %s\n",yytext);}
 [+-]?{digit}*"."{digit}{1,6} { printf ("Float %s\n",yytext);}
 {string}        { printf ("String %s\n",yytext);}
