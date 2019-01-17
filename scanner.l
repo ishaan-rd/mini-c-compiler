@@ -49,6 +49,7 @@ preprocdir  "#include"|"#define"|"#"|"#if"|"#else"|"#elif"|"#ifndef"|"#ifdef"|"#
 [+-]?{digit}{1,5}   { printf ("Integer %s\n\n",yytext); }
 [+-]?{digit}*"."{digit}{1,6} { printf ("Float %s\n\n",yytext); }
 {string}        { printf ("String %s\n\n",yytext); }
+{mlcommenterr}  { printf ("Multi Line Comment Err %s\n\n",yytext); }   
 %%
 
 
