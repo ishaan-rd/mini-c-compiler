@@ -3,5 +3,5 @@ lex.yy.c
 Sample Report-Lexical Analysis.pdf
 a.exe
 .vscode
-*.h
-*.c
+*.tab.h
+*.tab.c

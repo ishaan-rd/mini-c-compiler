@@ -9,7 +9,8 @@ int symbolVal(char symbol);
 void updateSymbolVal(char symbol, int val);
 %}
 
-%union {int num; char id;}         /* Yacc definitions */
+// Symbol table
+%union {int num; char id;}
 %start line
 %token print
 %token <num> number
