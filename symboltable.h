@@ -10,10 +10,16 @@ typedef enum dt{INT, LONG, LLONG, SHORT, SIGNED, UNSIGNED, CHAR, FUNCTION} datat
 typedef struct sym_t{
     char * token_name;
     datatype token_type;
-    struct sym_t * next;
+    // char * token_type;
+    struct sym_t * pred;
 } symtable;
 
-int isPresent(char * token_name);
-void updateSymbolVal(char symbol, int val);
+symtable ** table = NULL;
+
+void init();
+
 void yyerror (char *s);
+
+int insert(char * token_name, datatype token_type);
+
 int yylex();
