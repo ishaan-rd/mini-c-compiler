@@ -50,11 +50,5 @@ term:	number                {$$ = $1;}
 %%                     /* C code */
 
 int main (void) {
-	/* init symbol table */
-	int i;
-	for(i=0; i<52; i++) {
-		symbols[i] = 0;
-	}
-
-	return yyparse ( );
+	init();
 }
