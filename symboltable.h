@@ -5,7 +5,7 @@
 
 #define HT_SIZE 1000
 
-typedef enum dt{INT, LONG, LLONG, SHORT, SIGNED, UNSIGNED, CHAR, FUNCTION} datatype; 
+typedef enum dt{INT, LONG, LLONG, SHORT, SIGNED, UNSIGNED, CHAR, INTPTR, CHARPTR, FUNCTION} datatype; 
 
 typedef struct sym_t{
     char * token_name;
