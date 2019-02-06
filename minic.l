@@ -23,6 +23,8 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 "signed"                          {return SIGNED;}
 "unsigned"                        {return UNSIGNED;}
 "char"                            {return CHAR;}
+"int *"                           {return INTPTR;}
+"char *"                          {return CHARPTR;}
 
 "for"                             {return FOR;}
 "while"                           {return WHILE;}
