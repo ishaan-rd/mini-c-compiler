@@ -1,7 +1,5 @@
 %{
-#include <stdlib.h>
-#include <stdio.h>
-int cmnt_strt = 0, lineno = 1;
+#include "minic.tab.h"
 %}
 
 letter [a-zA-Z]
@@ -25,6 +23,7 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 "signed"                          {return SIGNED;}
 "unsigned"                        {return UNSIGNED;}
 "char"                            {return CHAR;}
+
 "for"                             {return FOR;}
 "while"                           {return WHILE;}
 "break"                           {return BREAK;}
