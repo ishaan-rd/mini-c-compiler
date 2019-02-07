@@ -75,7 +75,8 @@ type:	INT
 		;
 
 declarationlist:
-
+		|
+		;
 
 declaration: type identifier 		{}
 		|
