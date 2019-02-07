@@ -1,5 +1,7 @@
 %{
-#include "minic.tab.h"
+  #include <stdlib.h>
+  #include <stdio.h>
+  int cmnt_strt = 0, lineno = 1;
 %}
 
 letter [a-zA-Z]

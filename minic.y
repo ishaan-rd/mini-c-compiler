@@ -81,10 +81,10 @@ declarationlist:
 		| declarationlist PUN_COM declare
 		;
 
-declare: identifier								{if($1.token_name != -1)  printf("%s is redeclared\n", ); yyerror("")}
-		| identifier PUN_SQO exp PUN_SQC
-		| identifier OP_ASS arithmetic_exp
-		| identifier OP_ASS OP_AND identifier
+declare: identifier								{ insert($1.token_name, lineno); }
+		| identifier PUN_SQO exp PUN_SQC		{ insert($1.token_name, lineno); }
+		| identifier OP_ASS arithmetic_exp		{ insert($1.token_name, lineno); }
+		| identifier OP_ASS OP_AND identifier	{ if(is_present($4.token_name)==-1){ printf("Line %d: %s does not exist\n", lineno, $4.token_name); yyerror("Undeclared variable\n"); } insert($1.token_name, lineno); }
 		;
 
 exp:	arithmetic_exp
@@ -106,13 +106,13 @@ arithmetic_exp: arithmetic_expr OP_AND arithmetic_expr
 		| OP_SUB arithmetic_exp %prec UMINUS
 		| OP_ADD arithmetic_exp %prec UMINUS
 		| PUN_BO arithmetic_exp PUN_BC
-		| identifier
+		| identifier										{ if(is_present($1.token_name)==-1){ printf("Line %d: %s does not exist\n", lineno, $1.token_name); yyerror("Undeclared variable\n"); } }
 		| constant
 		;
 
 assignment_exp:  identifier OP_ASS arithmetic_exp
 		| identifier OP_ASS function_call
-		| identifier OP_ASS identifier PUN_SQO exp PUN_SQC  
+		| identifier OP_ASS identifier PUN_SQO exp PUN_SQC  { if(is_present($3.token_name)==-1){ printf("Line %d: %s does not exist\n", lineno, $3.token_name); yyerror("Undeclared variable\n"); } }
 		;
 
 function_call: identifier PUN_BO untyped_parameterlist PUN_BC
@@ -179,6 +179,8 @@ while:	WHILE PUN_BO exp PUN_BC scoped_unscoped_statements
 		;
 
 %%                     /* C code */
+
+#include "lex.yy.c"
 
 int main (void) {
 	init();

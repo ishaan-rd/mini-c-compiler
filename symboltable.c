@@ -50,11 +50,12 @@ symtable * create_entry(char * token_name, datatype token_type){
 }
 
 // Return 0 if no error else return 1
-int insert(char * token_name, datatype token_type){
+int insert(char * token_name, datatype token_type, int lineno){
 	int h = is_present(token_name);
 	
 	if(h == -1){
-		printf("%s already exists\n", token_name);
+		printf("Line %d: %s already exists\n", lineno, token_name);
+		yyerror("Redeclared variable");
 		return 1;
 	}
 
