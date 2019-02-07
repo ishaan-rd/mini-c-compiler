@@ -28,6 +28,4 @@ int is_present(symtable ** table, char * token_name);
 
 void display(symtable ** table);
 
-void yyerroro (char *s) {fprintf (stderr, "\n%s\n", s);} 
-
 #endif
