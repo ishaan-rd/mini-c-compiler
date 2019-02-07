@@ -6,3 +6,4 @@ a.exe
 *.tab.h
 *.tab.c
 *.output
+tester.c
