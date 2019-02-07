@@ -95,15 +95,15 @@ int addIfNotPresent(symtable ** table, char * token_name, datatype token_type){
 
 void display(symtable ** table){
 	int i;
-	printf("_______________________________________________________________________________\n");
-	printf("|\t\tToken Name\t\t|\t\tType\t\t|\n");
-	printf("_______________________________________________________________________________\n");
+	printf("_________________________________________\n");
+	printf("|\tToken Name\t|\tType\t|\n");
+	printf("_________________________________________\n");
 	for(i=0; i < HT_SIZE; i++){
 		symtable * itr = table[i];
 		while(itr!=NULL){
-			printf("|\t\t%s\t\t\t|\t\t%d\t\t|\n", table[i]->token_name, table[i]->token_type);
+			printf("|\t%s\t\t|\t%d\t|\n", table[i]->token_name, table[i]->token_type);
 			itr = itr->pred;
 		}	
 	}
-	printf("_______________________________________________________________________________\n");
+	printf("_________________________________________\n");
 }

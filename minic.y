@@ -79,7 +79,7 @@ type:	INT 					{current_dt = I;}
 		| LLONG 				{current_dt = LL;}
 		| SHORT 				{current_dt = SH;}
 		| CHAR					{current_dt = CH;}
-		| VOID 					{current_dt = VO}
+		| VOID 					{current_dt = VO;}
 		| type OP_MUL			{current_dt = PTR;}
 		;
 
@@ -92,7 +92,8 @@ declare: identifier								{ insert(table, $1, current_dt); }
 		| identifier PUN_SQO exp PUN_SQC		{ insert(table, $1, current_dt); }
 		| identifier OP_ASS function_call		{ insert(table, $1, current_dt); }
 		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt); }
-		| identifier OP_ASS OP_AND identifier	{ if(is_present(table, $4)!=-1){ printf("\n%s does not exist\n", $4); yyerror("Undeclared variable\n"); } else insert(table, $1, current_dt); }
+		| identifier OP_ASS OP_ADR identifier	{ if(is_present(table, $4)!=-1){ printf("\n%s does not exist\n", $4); yyerror("Undeclared variable\n"); } else insert(table, $1, current_dt); }
+		| point_exp
 		;
 
 exp:	arithmetic_exp
@@ -120,9 +121,15 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp
 
 assignment_exp:  identifier OP_ASS arithmetic_exp
 		| identifier OP_ASS function_call
+		| identifier OP_ASS OP_ADR identifier
 		| identifier OP_ASS identifier PUN_SQO exp PUN_SQC  { if(is_present(table, $3)!=-1){ printf("\n%s does not exist\n", $3); yyerror("Undeclared variable\n"); } }
+		| identifier OP_ASS point_exp
 		| identifier OP_INC
 		| identifier OP_DEC
+		;
+
+point_exp: OP_MUL identifier
+		| OP_MUL point_exp
 		;
 
 function_call: identifier PUN_BO untyped_parameterlist PUN_BC {addIfNotPresent(table, $1, FUNCTION);}
@@ -140,9 +147,11 @@ constant: CONSTANT_CHAR
 untyped_parameterlist: identifier
 		| constant
 		| CONSTANT_STR
+		| point_exp
 		| untyped_parameterlist PUN_COM identifier
 		| untyped_parameterlist PUN_COM constant
 		| untyped_parameterlist PUN_COM CONSTANT_STR
+		| untyped_parameterlist PUN_COM point_exp
 		;
 
 function: type identifier functionparameters scoped_statements	{insert(table, strdup($2), FUNCTION);}
