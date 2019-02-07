@@ -1,3 +1,7 @@
+#ifndef SYMBOL_TABLE_H_
+
+#define SYMBOL_TABLE_H
+
 #include <stdio.h>     /* C declarations used in actions */
 #include <stdlib.h>
 #include <ctype.h>
@@ -23,3 +27,5 @@ int insert(char * token_name, datatype token_type);
 int yylex();
 
 int is_present(char * token_name);
+
+#endif
