@@ -76,6 +76,7 @@ void display(symtable ** table){
 	int i;
 	printf("|Token Name	|	Type	|");
 	for(i=0; i < HT_SIZE; i++){
+		printf("Helo\n");
 		while(table[i]->pred!=NULL){
 			printf("|%s			|%d			|", table[i]->token_name, table[i]->token_type);
 		}	

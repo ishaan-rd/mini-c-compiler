@@ -194,7 +194,9 @@ int main (int argc, char * argv[]) {
 
 	yyin = fopen(argv[1], "r");
 
-	yyparse();
+	int x = yyparse();
+
+	printf("x is %d \n", x);
 
 	display(table);
 
