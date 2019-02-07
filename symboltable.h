@@ -22,6 +22,8 @@ symtable ** init();
 
 int insert(symtable ** table, char * token_name, datatype token_type);
 
+int addIfNotPresent(symtable ** table, char * token_name, datatype token_type);
+
 int yylex();
 
 int is_present(symtable ** table, char * token_name);

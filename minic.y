@@ -89,6 +89,7 @@ delarationlist:
 
 declare: identifier								{ insert(table, $1, current_dt); }
 		| identifier PUN_SQO exp PUN_SQC		{ insert(table, $1, current_dt); }
+		| identifier OP_ASS function_call		{ insert(table, $1, current_dt); }
 		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt); }
 		| identifier OP_ASS OP_AND identifier	{ if(is_present(table, $4)!=-1){ printf("\n%s does not exist\n", $4); yyerror("Undeclared variable\n"); } else insert(table, $1, current_dt); }
 		;
@@ -123,7 +124,8 @@ assignment_exp:  identifier OP_ASS arithmetic_exp
 		| identifier OP_DEC
 		;
 
-function_call: identifier PUN_BO untyped_parameterlist PUN_BC
+function_call: identifier PUN_BO untyped_parameterlist PUN_BC {addIfNotPresent(table, $1, FUNCTION);}
+		| identifier PUN_BO PUN_BC
 		;
 
 identifier: ID				{$$ = strdup($1);}
@@ -136,8 +138,10 @@ constant: CONSTANT_CHAR
 
 untyped_parameterlist: identifier
 		| constant
+		| CONSTANT_STR
 		| untyped_parameterlist PUN_COM identifier
 		| untyped_parameterlist PUN_COM constant
+		| untyped_parameterlist PUN_COM CONSTANT_STR
 		;
 
 function: type identifier functionparameters scoped_statements	{insert(table, strdup($2), FUNCTION);}
@@ -160,6 +164,10 @@ statements: statement
 		| statements statement
 		;
 
+assignment_list: assignment_exp
+		| assignment_list PUN_COM assignment_exp
+		;	
+
 statement: if
 		| for
 		| while
@@ -169,7 +177,7 @@ statement: if
 		| BREAK SEMICOLON
 		| function_call SEMICOLON
 		| declaration
-		| assignment_exp SEMICOLON			
+		| assignment_list SEMICOLON
 		;
 
 scoped_unscoped_statements: scoped_statements

@@ -42,7 +42,6 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 [+\-]?[0][x|X]{hex}               {return CONSTANT_HEX;}
 [+\-]?{digit}{1,5}                {return CONSTANT_INT;}
 ['].[']                           {return CONSTANT_CHAR;}
-["].["]                           {return CONSTANT_STR;}
 
 
 "/*"                              {printf("Multiline comment start at lineno %d\n", lineno); cmnt_strt = lineno; BEGIN CMNT;}
@@ -66,7 +65,7 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 
 "//".*                            {printf("Single line comment at lineno %d\n", lineno);};
 "*/"                              {printf("ERROR %d : Invalid comments\n",lineno); yyterminate();}
-\"(\\.|[^"\\])*\"                 {printf("string         : %s\n",yytext);}
+\"(\\.|[^"\\])*\"                 {printf("string         : %s\n",yytext); return CONSTANT_STR;}
 \"[^\"\n]*$                       {printf("ERROR %d : Unterminated string %s\n",lineno,yytext);yyterminate();}
 {digit}+({letter}|_)+	            {printf("ERROR %d : Illegal identifier name %s\n",lineno,yytext);yyterminate();}
 \n                                {lineno++;}

@@ -77,6 +77,22 @@ int insert(symtable ** table, char * token_name, datatype token_type){
 	return 0;
 }
 
+int addIfNotPresent(symtable ** table, char * token_name, datatype token_type){
+	int h = is_present(table, token_name);
+
+	if(table[h] == NULL)
+		table[h] = create_entry(token_name, token_type);
+	else{
+		symtable * entry = create_entry(token_name, token_type);
+		symtable * ptr = table[h];
+		entry->pred = ptr;
+		table[h] = entry;
+	}
+
+	return 0;
+}
+
+
 void display(symtable ** table){
 	int i;
 	printf("_______________________________________________________________________________\n");
