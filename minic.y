@@ -182,7 +182,7 @@ while:	WHILE PUN_BO exp PUN_BC scoped_unscoped_statements
 
 #include "lex.yy.c"
 
-int main (void) {
+int main (int argc, char * argv[]) {
 	init();
 
 	yyin = fopen(argv[1], "r");

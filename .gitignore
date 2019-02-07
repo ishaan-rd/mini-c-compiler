@@ -5,3 +5,4 @@ a.exe
 .vscode
 *.tab.h
 *.tab.c
+*.output
