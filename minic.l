@@ -17,6 +17,7 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 %x CMNT
 %x INCLUDE
 %x DEFINE
+%option noyywrap
 
 %%
 
@@ -36,7 +37,7 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 
 {ws}                              ;
 
-{identifier}                      {yylval.token_name = yytext; return ID;}
+{identifier}                      {yylval.token_name = yytext; printf("%s \n", yytext); return ID;}
 
 [+\-]?[0][x|X]{hex}               {return CONSTANT_HEX;}
 [+\-]?{digit}{1,5}                {return CONSTANT_INT;}

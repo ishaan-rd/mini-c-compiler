@@ -1,6 +1,5 @@
 %{
 	#include "symboltable.h"
-	#define yywrap() 1
 	
 	void yyerror(char *);
 
