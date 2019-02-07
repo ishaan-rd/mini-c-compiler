@@ -56,7 +56,7 @@ int insert(symtable ** table, char * token_name, datatype token_type){
 	
 	if(h == -1){
 		printf("%s already exists\n", token_name);
-		yyerror("Redeclared variable");
+		yyerroro("Redeclared variable");
 		return 1;
 	}
 
