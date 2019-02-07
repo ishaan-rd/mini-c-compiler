@@ -5,7 +5,7 @@
 %}
 
 // Symbol table
-%union {int num; char id;}
+%union {datatype token_type; char* token_name;}
 %start line
 %token print
 %token <num> number
