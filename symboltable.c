@@ -2,8 +2,8 @@
 
 void init(){
 	table = (symtable **)malloc(HT_SIZE * sizeof(symtable *));
-	
-	for(int i = 0; i < HT_SIZE; i++){
+	int i;
+	for(i = 0; i < HT_SIZE; i++){
 		table[i] = NULL;
 	}
 }

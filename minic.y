@@ -2,6 +2,8 @@
 	#include "symboltable.h"
 	#define yywrap() 1
 	
+	void yyerror(char *);
+	
 	datatype current_dt;
 %}
 
@@ -119,7 +121,7 @@ assignment_exp:  identifier OP_ASS arithmetic_exp
 function_call: identifier PUN_BO untyped_parameterlist PUN_BC
 		;
 
-identifier: ID				{$$ = $1.token_name;}
+identifier: ID				{$$ = $1;}
 		;
 
 constant: CONSTANT_CHAR
