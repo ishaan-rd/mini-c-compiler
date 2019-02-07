@@ -101,10 +101,10 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 .                                 {printf("ERROR %d : Illegal character %s\n",lineno,yytext);yyterminate();}
 %%
 
-int yywrap() { return 1; }
+// int yywrap() { return 1; }
 
-int main()
-{
-  yyin=fopen("test.c","r");
-  yylex();
-}
+// int main()
+// {
+//   yyin=fopen("test.c","r");
+//   yylex();
+// }
