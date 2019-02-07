@@ -36,7 +36,7 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 
 {ws}                              ;
 
-{identifier}                      {yyval.token_name = yytext; return ID;}
+{identifier}                      {yylval.token_name = yytext; return ID;}
 
 [+\-]?[0][x|X]{hex}               {return CONSTANT_HEX;}
 [+\-]?{digit}{1,5}                {return CONSTANT_INT;}

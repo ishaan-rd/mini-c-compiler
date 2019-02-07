@@ -45,12 +45,13 @@
 %type <token_name> identifier
 
 %left PUN_COM
-%right OP_ASS
 %left OP_OR OP_AND
-%left EQ NOT_EQ
+%left OP_EE OP_NE
 %left OP_LT OP_GT OP_LE OP_GE
 %left OP_ADD OP_SUB
 %left OP_MUL OP_DIV OP_MOD
+
+%right OP_ASS
 
 %nonassoc UMINUS
 %nonassoc LOWER_THAN_ELSE
@@ -81,10 +82,10 @@ delarationlist:
 		| delarationlist PUN_COM declare
 		;
 
-declare: identifier								{ insert($1.token_name, lineno); }
-		| identifier PUN_SQO exp PUN_SQC		{ insert($1.token_name, lineno); }
-		| identifier OP_ASS arithmetic_exp		{ insert($1.token_name, lineno); }
-		| identifier OP_ASS OP_AND identifier	{ if(is_present($4.token_name)==-1){ printf("Line %d: %s does not exist\n", lineno, $4.token_name); yyerror("Undeclared variable\n"); } insert($1.token_name, lineno); }
+declare: identifier								{ insert($1, lineno); }
+		| identifier PUN_SQO exp PUN_SQC		{ insert($1, lineno); }
+		| identifier OP_ASS arithmetic_exp		{ insert($1, lineno); }
+		| identifier OP_ASS OP_AND identifier	{ if(is_present($4)==-1){ printf("Line %d: %s does not exist\n", lineno, $4); yyerror("Undeclared variable\n"); } else insert($1, lineno); }
 		;
 
 exp:	arithmetic_exp
@@ -106,19 +107,19 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp
 		| OP_SUB arithmetic_exp %prec UMINUS
 		| OP_ADD arithmetic_exp %prec UMINUS
 		| PUN_BO arithmetic_exp PUN_BC
-		| identifier										{ if(is_present($1.token_name)==-1){ printf("Line %d: %s does not exist\n", lineno, $1.token_name); yyerror("Undeclared variable\n"); } }
+		| identifier										{ if(is_present($1)==-1){ printf("Line %d: %s does not exist\n", lineno, $1); yyerror("Undeclared variable\n"); } }
 		| constant
 		;
 
 assignment_exp:  identifier OP_ASS arithmetic_exp
 		| identifier OP_ASS function_call
-		| identifier OP_ASS identifier PUN_SQO exp PUN_SQC  { if(is_present($3.token_name)==-1){ printf("Line %d: %s does not exist\n", lineno, $3.token_name); yyerror("Undeclared variable\n"); } }
+		| identifier OP_ASS identifier PUN_SQO exp PUN_SQC  { if(is_present($3)==-1){ printf("Line %d: %s does not exist\n", lineno, $3); yyerror("Undeclared variable\n"); } }
 		;
 
 function_call: identifier PUN_BO untyped_parameterlist PUN_BC
 		;
 
-identifier: ID				{$$ = $1.token_name;}
+identifier: ID				{$$ = $1;}
 		;
 
 constant: CONSTANT_CHAR
