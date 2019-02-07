@@ -5,7 +5,7 @@
 
 #define HT_SIZE 1000
 
-typedef enum dt{INT, LONG, LLONG, SHORT, SIGNED, UNSIGNED, CHAR, INTPTR, CHARPTR, FUNCTION} datatype; 
+typedef enum dt{INT, LONG, LLONG, SHORT, SIGNED, UNSIGNED, CHAR, PTR, FUNCTION} datatype; 
 
 typedef struct sym_t{
     char * token_name;
@@ -23,3 +23,5 @@ void yyerror (char *s);
 int insert(char * token_name, datatype token_type);
 
 int yylex();
+
+int is_present(char * token_name);
