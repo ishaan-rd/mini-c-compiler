@@ -164,7 +164,7 @@ statement: if
 		;
 
 scoped_unscoped_statements: scoped_statements
-		| statements
+		| statement
 		;
 
 if:		IF PUN_BO exp PUN_BC scoped_unscoped_statements %prec LOWER_THAN_ELSE
