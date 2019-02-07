@@ -1,5 +1,6 @@
 %{
 	#include "symboltable.h"
+	#include "lex.yy.c"
 	#define yywrap() 1
 	
 	datatype current_dt;
@@ -180,8 +181,6 @@ while:	WHILE PUN_BO exp PUN_BC scoped_unscoped_statements
 		;
 
 %%                     /* C code */
-
-#include "lex.yy.c"
 
 int main (int argc, char * argv[]) {
 	init();
