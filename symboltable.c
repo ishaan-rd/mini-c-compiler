@@ -1,14 +1,15 @@
 #include "symboltable.h"
 
-void init(){
-	table = (symtable **)malloc(HT_SIZE * sizeof(symtable *));
+symtable ** init(){
+	symtable ** table = (symtable **)malloc(HT_SIZE * sizeof(symtable *));
 	int i;
 	for(i = 0; i < HT_SIZE; i++){
 		table[i] = NULL;
 	}
+	return table;
 }
 
-int hash( char *token_name )
+int hash(symtable ** table, char *token_name )
 {
 	size_t i;
 	int hash;
@@ -26,8 +27,8 @@ int hash( char *token_name )
 	return hash % HT_SIZE;
 }
 
-int is_present(char * token_name){
-	int h = hash(token_name);
+int is_present(symtable ** table, char * token_name){
+	int h = hash(table, token_name);
 
 	symtable * ptr = table[h];
 	while(ptr!=NULL){
@@ -50,8 +51,8 @@ symtable * create_entry(char * token_name, datatype token_type){
 }
 
 // Return 0 if no error else return 1
-int insert(char * token_name, datatype token_type){
-	int h = is_present(token_name);
+int insert(symtable ** table, char * token_name, datatype token_type){
+	int h = is_present(table, token_name);
 	
 	if(h == -1){
 		printf("%s already exists\n", token_name);

@@ -18,14 +18,12 @@ typedef struct sym_t{
     struct sym_t * pred;
 } symtable;
 
-symtable ** table = NULL;
+symtable ** init();
 
-void init();
-
-int insert(char * token_name, datatype token_type);
+int insert(symtable ** table, char * token_name, datatype token_type);
 
 int yylex();
 
-int is_present(char * token_name);
+int is_present(symtable ** table, char * token_name);
 
 #endif
