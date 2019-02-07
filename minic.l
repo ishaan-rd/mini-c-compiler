@@ -9,7 +9,9 @@ identifier (_|{letter})({letter}|{digit}|_){0,31}
 hex [0-9a-f]
 constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 
- /* Exclusive states */
+/* Exclusive states */
+/* [+\-]?{digit}{1,5}"."{digit}{1,6} {return CONSTANT_FLOAT;}*/
+
 %x CMNT
 %x INCLUDE
 %x DEFINE
@@ -40,8 +42,9 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 
 [+\-]?[0][x|X]{hex}               {return CONSTANT_HEX;}
 [+\-]?{digit}{1,5}                {return CONSTANT_INT;}
-[+\-]?{digit}{1,5}"."{digit}{1,6} {return CONSTANT_FLOAT;}
 ['].[']                           {return CONSTANT_CHAR;}
+["].["]                           {return CONSTANT_STRING;}
+
 
 "/*"                              {printf("Multiline comment start at lineno %d\n", lineno); cmnt_strt = lineno; BEGIN CMNT;}
 <CMNT>.|{ws}                      ;
@@ -78,14 +81,16 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 ">"				                        {return OP_GT;}
 "<="			                        {return OP_LE;}
 ">="			                        {return OP_GE;}
-"="				                        {return OP_ASS;}
 "=="			                        {return OP_EE;}
 "!="			                        {return OP_NE;}
+"="				                        {return OP_ASS;}
 "-"				                        {return OP_SUB;}
 "+"				                        {return OP_ADD;}
 "*"				                        {return OP_MUL;}
 "/"		                            {return OP_DIV;}
 "%"				                        {return OP_MOD;}
+
+"&"                               {return OP_ADR;}
 
 ","				                        {return PUN_COM;}
 "("				                        {return PUN_BO;}
