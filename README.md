@@ -4,6 +4,9 @@ Repo for Mini C Compiler using lex, yaac
 
 ### How to run
 
+**If on linux based and are not bothered to run all the commands run run.sh**
+
+
 * `bison -yd .\minic.y --verbose`
 
 * `flex .\minic.l`
