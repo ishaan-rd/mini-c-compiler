@@ -90,7 +90,7 @@ delarationlist:
 declare: identifier								{ insert(table, $1, current_dt); }
 		| identifier PUN_SQO exp PUN_SQC		{ insert(table, $1, current_dt); }
 		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt); }
-		| identifier OP_ASS OP_AND identifier	{ if(is_present(table, $4)==-1){ printf("\n%s does not exist\n", $4); yyerror("Undeclared variable\n"); } else insert(table, $1, current_dt); }
+		| identifier OP_ASS OP_AND identifier	{ if(is_present(table, $4)!=-1){ printf("\n%s does not exist\n", $4); yyerror("Undeclared variable\n"); } else insert(table, $1, current_dt); }
 		;
 
 exp:	arithmetic_exp
@@ -112,13 +112,13 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp
 		| OP_SUB arithmetic_exp %prec UMINUS
 		| OP_ADD arithmetic_exp %prec UMINUS
 		| PUN_BO arithmetic_exp PUN_BC
-		| identifier										{ if(is_present(table, $1)==-1){ printf("\n%s does not exist\n", $1); yyerror("Undeclared variable\n"); } }
+		| identifier										{ if(is_present(table, $1)!=-1){ printf("\n%s does not exist\n", $1); yyerror("Undeclared variable\n"); } }
 		| constant
 		;
 
 assignment_exp:  identifier OP_ASS arithmetic_exp
 		| identifier OP_ASS function_call
-		| identifier OP_ASS identifier PUN_SQO exp PUN_SQC  { if(is_present(table, $3)==-1){ printf("\n%s does not exist\n", $3); yyerror("Undeclared variable\n"); } }
+		| identifier OP_ASS identifier PUN_SQO exp PUN_SQC  { if(is_present(table, $3)!=-1){ printf("\n%s does not exist\n", $3); yyerror("Undeclared variable\n"); } }
 		;
 
 function_call: identifier PUN_BO untyped_parameterlist PUN_BC
