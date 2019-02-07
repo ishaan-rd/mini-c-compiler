@@ -18,8 +18,6 @@ symtable ** table = NULL;
 
 void init();
 
-void yyerror (char *s);
-
 int insert(char * token_name, datatype token_type);
 
 int yylex();

@@ -1,6 +1,5 @@
 %{
 	#include "symboltable.h"
-	#include "lex.yy.c"
 	#define yywrap() 1
 	
 	datatype current_dt;
@@ -83,10 +82,10 @@ delarationlist:
 		| delarationlist PUN_COM declare
 		;
 
-declare: identifier								{ insert($1, lineno); }
-		| identifier PUN_SQO exp PUN_SQC		{ insert($1, lineno); }
-		| identifier OP_ASS arithmetic_exp		{ insert($1, lineno); }
-		| identifier OP_ASS OP_AND identifier	{ if(is_present($4)==-1){ printf("Line %d: %s does not exist\n", lineno, $4); yyerror("Undeclared variable\n"); } else insert($1, lineno); }
+declare: identifier								{ insert($1, current_dt); }
+		| identifier PUN_SQO exp PUN_SQC		{ insert($1, current_dt); }
+		| identifier OP_ASS arithmetic_exp		{ insert($1, current_dt); }
+		| identifier OP_ASS OP_AND identifier	{ if(is_present($4)==-1){ printf("\n%s does not exist\n", $4); yyerror("Undeclared variable\n"); } else insert($1, current_dt); }
 		;
 
 exp:	arithmetic_exp
@@ -108,19 +107,19 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp
 		| OP_SUB arithmetic_exp %prec UMINUS
 		| OP_ADD arithmetic_exp %prec UMINUS
 		| PUN_BO arithmetic_exp PUN_BC
-		| identifier										{ if(is_present($1)==-1){ printf("Line %d: %s does not exist\n", lineno, $1); yyerror("Undeclared variable\n"); } }
+		| identifier										{ if(is_present($1)==-1){ printf("\n%s does not exist\n", $1); yyerror("Undeclared variable\n"); } }
 		| constant
 		;
 
 assignment_exp:  identifier OP_ASS arithmetic_exp
 		| identifier OP_ASS function_call
-		| identifier OP_ASS identifier PUN_SQO exp PUN_SQC  { if(is_present($3)==-1){ printf("Line %d: %s does not exist\n", lineno, $3); yyerror("Undeclared variable\n"); } }
+		| identifier OP_ASS identifier PUN_SQO exp PUN_SQC  { if(is_present($3)==-1){ printf("\n%s does not exist\n", $3); yyerror("Undeclared variable\n"); } }
 		;
 
 function_call: identifier PUN_BO untyped_parameterlist PUN_BC
 		;
 
-identifier: ID				{$$ = $1;}
+identifier: ID				{$$ = $1.token_name;}
 		;
 
 constant: CONSTANT_CHAR
@@ -181,6 +180,10 @@ while:	WHILE PUN_BO exp PUN_BC scoped_unscoped_statements
 		;
 
 %%                     /* C code */
+
+#include "lex.yy.c"
+
+void yyerror (char *s) {fprintf (stderr, "Line %d: %s\n", lineno, s);} 
 
 int main (int argc, char * argv[]) {
 	init();
