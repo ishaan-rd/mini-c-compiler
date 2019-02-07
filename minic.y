@@ -8,7 +8,7 @@
 %union {datatype token_type; char* token_name;}
 
 // Data types
-%token <token_type> INT LONG LLONG SHORT SIGNED UNSIGNED CHAR INTPTR CHARPTR
+%token <token_type> INT LONG LLONG SHORT CHAR
 
 // Identifiers
 %token <token_name> ID
@@ -53,46 +53,37 @@
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
-%start line
-%token print
-%token <num> number
-%token <id> identifier
-%type <num> line exp term 
-%type <id> assignment
-%token INT CHAR FLOAT DOUBLE VOID
-%token IF ELSE
-%token FOR WHILE
-%token INCLUDE
-%token STRUCT RETURN
-
+%start program
 %%
 
 /* descriptions of expected inputs     corresponding actions (in C) */
-includestatement:	'#' INCLUDE LT ID GT
-					| '#' INCLUDE LT ID '.' ID GT
-					;
+program: declaration
+		| function
+		| program declaration
+		| program function
+		;
 
-include:	includestatement
-			;
+declaration:  type delarationlist ';'
+		;
 
-functiondef:	dtype ID PUN_FO PUN_FC
-				;
+type:	INT 
+		|LONG 
+		|LLONG 
+		|SHORT 
+		|CHAR
+		|type '*'
+		;
 
-line:	assignment ';'		{;}
-		| print exp ';'			{printf("Value is %d\n", $2);}
-		| line assignment ';'	{;}
-		| line print exp ';'	{printf("Value is %d\n", $3);}
-        ;
+declarationlist:
 
-assignment:	identifier '=' exp  { updateSymbolVal($1,$3); }
-			;
-exp:	term                  {$$ = $1;}
-       	| exp '+' term          {$$ = $1 + $3;}
-       	| exp '-' term          {$$ = $1 - $3;}
-       	;
-term:	number                {$$ = $1;}
-		| identifier			{$$ = symbolVal($1);} 
-        ;
+
+declaration: type identifier 		{}
+		|
+		;
+
+
+
+
 
 %%                     /* C code */
 
