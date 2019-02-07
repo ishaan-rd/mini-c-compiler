@@ -21,6 +21,7 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 
 %%
 
+"void"                            {return VOID;}
 "int"                             {return INT;}
 "long"                            {return LONG;}
 "long long"                       {return LLONG;}

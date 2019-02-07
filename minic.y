@@ -14,7 +14,7 @@
 %token SEMICOLON
 
 // Data types
-%token INT LONG LLONG SHORT CHAR
+%token INT LONG LLONG SHORT CHAR VOID
 
 // Identifiers
 %token <token_name> ID
@@ -79,6 +79,7 @@ type:	INT 					{current_dt = I;}
 		| LLONG 				{current_dt = LL;}
 		| SHORT 				{current_dt = SH;}
 		| CHAR					{current_dt = CH;}
+		| VOID 					{current_dt = VO}
 		| type OP_MUL			{current_dt = PTR;}
 		;
 
