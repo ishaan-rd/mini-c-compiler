@@ -26,4 +26,6 @@ int yylex();
 
 int is_present(symtable ** table, char * token_name);
 
+void table(symtable ** table);
+
 #endif

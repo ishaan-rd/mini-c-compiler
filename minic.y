@@ -196,5 +196,7 @@ int main (int argc, char * argv[]) {
 
 	yyparse();
 
+	display(table);
+
 	fclose(yyin);
 }

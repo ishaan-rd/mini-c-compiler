@@ -71,3 +71,13 @@ int insert(symtable ** table, char * token_name, datatype token_type){
 
 	return 0;
 }
+
+void display(symtable ** table){
+	int i;
+	printf("|Token Name	|	Type	|");
+	for(i=0; i < HT_SIZE; i++){
+		while(table[i]->pred!=NULL){
+			printf("|%s			|%d			|", table[i]->token_name, table[i]->token_type);
+		}	
+	}
+}
