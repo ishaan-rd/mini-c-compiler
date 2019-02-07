@@ -119,6 +119,8 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp
 assignment_exp:  identifier OP_ASS arithmetic_exp
 		| identifier OP_ASS function_call
 		| identifier OP_ASS identifier PUN_SQO exp PUN_SQC  { if(is_present(table, $3)!=-1){ printf("\n%s does not exist\n", $3); yyerror("Undeclared variable\n"); } }
+		| identifier OP_INC
+		| identifier OP_DEC
 		;
 
 function_call: identifier PUN_BO untyped_parameterlist PUN_BC
@@ -166,7 +168,8 @@ statement: if
 		| CONTINUE SEMICOLON
 		| BREAK SEMICOLON
 		| function_call SEMICOLON
-		| declaration			
+		| declaration
+		| assignment_exp SEMICOLON			
 		;
 
 scoped_unscoped_statements: scoped_statements
@@ -178,7 +181,7 @@ if:		IF PUN_BO exp PUN_BC scoped_unscoped_statements %prec LOWER_THAN_ELSE
     	;
 
 
-for:	FOR PUN_BO for_exp for_exp exp PUN_BC scoped_unscoped_statements
+for:	FOR PUN_BO for_exp for_exp exp PUN_BC scoped_unscoped_statements	
 		|FOR PUN_BO for_exp for_exp PUN_BC scoped_unscoped_statements
 		;
 
