@@ -85,10 +85,10 @@ delarationlist:
 		| delarationlist PUN_COM declare
 		;
 
-declare: identifier								{ insert(table, $1, current_dt); }
-		| identifier PUN_SQO exp PUN_SQC		{ insert(table, $1, current_dt); }
-		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt); }
-		| identifier OP_ASS OP_AND identifier	{ if(is_present(table, $4)==-1){ printf("\n%s does not exist\n", $4); yyerror("Undeclared variable\n"); } else insert(table, $1, current_dt); }
+declare: identifier								{ /*insert(table, $1, current_dt);*/ }
+		| identifier PUN_SQO exp PUN_SQC		{ /*insert(table, $1, current_dt);*/ }
+		| identifier OP_ASS arithmetic_exp		{ /*insert(table, $1, current_dt);*/ }
+		| identifier OP_ASS OP_AND identifier	{ if(is_present(table, $4)==-1){ printf("\n%s does not exist\n", $4); yyerror("Undeclared variable\n"); } /*else insert(table, $1, current_dt);*/ }
 		;
 
 exp:	arithmetic_exp
@@ -136,7 +136,7 @@ untyped_parameterlist: identifier
 		| untyped_parameterlist PUN_COM constant
 		;
 
-function: type identifier typed_parameterlist scoped_statements
+function: type identifier typed_parameterlist scoped_statements	{printf("%s", $2); /*insert(table, $2, FUNCTION);*/}
 		;
 
 typed_parameterlist: type identifier
