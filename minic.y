@@ -122,7 +122,7 @@ assignment_exp:  identifier OP_ASS arithmetic_exp
 function_call: identifier PUN_BO untyped_parameterlist PUN_BC
 		;
 
-identifier: ID				{$$ = $1;}
+identifier: ID				{$$ = strdup($1);}
 		;
 
 constant: CONSTANT_CHAR
@@ -136,7 +136,11 @@ untyped_parameterlist: identifier
 		| untyped_parameterlist PUN_COM constant
 		;
 
-function: type identifier typed_parameterlist scoped_statements	{printf("%s", $2); /*insert(table, $2, FUNCTION);*/}
+function: type identifier functionparameters scoped_statements	{insert(table, strdup($2), FUNCTION);}
+		;
+
+functionparameters: PUN_BO typed_parameterlist PUN_BC
+		|PUN_BO PUN_BC
 		;
 
 typed_parameterlist: type identifier
@@ -160,6 +164,7 @@ statement: if
 		| CONTINUE ';'
 		| BREAK ';'
 		| function_call ';'
+		| declaration			
 		;
 
 scoped_unscoped_statements: scoped_statements
@@ -194,8 +199,6 @@ int main (int argc, char * argv[]) {
 	yyin = fopen(argv[1], "r");
 
 	int x = yyparse();
-
-	printf("x is %d \n", x);
 
 	display(table);
 

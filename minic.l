@@ -94,12 +94,12 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 ","				                        {return PUN_COM;}
 "("				                        {return PUN_BO;}
 ")"				                        {return PUN_BC;}
-"{"			                          {return PUN_FO;}  
+"{"			                          {return PUN_FO;}
 "}"			                          {return PUN_FC;}
 "["				                        {return PUN_SQO;}
 "]"				                        {return PUN_SQC;}
-
-.                                 {printf("ERROR %d : Illegal character %s\n",lineno,yytext);yyterminate();}
+";"                               {return ';';}
+.                                 ;
 %%
 
 // int yywrap() { return 1; }
