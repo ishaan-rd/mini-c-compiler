@@ -15,7 +15,7 @@ int hash(char *token_name )
 	int hash = 0;
 
 	for (i = 0; i < strlen(token_name); ++i ) {
-        hash += token_name[i];
+		hash += token_name[i];
         hash += ( hash << 10 );
         hash ^= ( hash >> 6 );
     }
@@ -23,7 +23,13 @@ int hash(char *token_name )
 	hash += ( hash << 3 );
 	hash ^= ( hash >> 11 );
     hash += ( hash << 15 );
-	return hash % HT_SIZE;
+
+	int h = hash % HT_SIZE;
+
+	if(hash >= 0)
+		return h;
+	else
+		return -h;
 }
 
 int is_present(symtable ** table, char * token_name){
@@ -61,12 +67,12 @@ int insert(symtable ** table, char * token_name, datatype token_type){
 
 	if(table[h] == NULL)
 		table[h] = create_entry(token_name, token_type);
-	// else{
-	// 	symtable * entry = create_entry(token_name, token_type);
-	// 	symtable * ptr = table[h];
-	// 	entry->pred = ptr;
-	// 	table[h] = entry;
-	// }
+	else{
+		symtable * entry = create_entry(token_name, token_type);
+		symtable * ptr = table[h];
+		entry->pred = ptr;
+		table[h] = entry;
+	}
 
 	return 0;
 }

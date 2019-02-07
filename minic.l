@@ -98,7 +98,7 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 "}"			                          {return PUN_FC;}
 "["				                        {return PUN_SQO;}
 "]"				                        {return PUN_SQC;}
-";"                               {return ';';}
+";"                               {return SEMICOLON;}
 .                                 ;
 %%
 

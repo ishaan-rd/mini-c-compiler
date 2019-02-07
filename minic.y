@@ -11,6 +11,8 @@
 // Symbol table
 %union {char* token_name;}
 
+%token SEMICOLON
+
 // Data types
 %token INT LONG LLONG SHORT CHAR
 
@@ -69,7 +71,7 @@ program: declaration
 		| program function
 		;
 
-declaration: type delarationlist ';'
+declaration: type delarationlist SEMICOLON
 		;
 
 type:	INT 					{current_dt = I;}
@@ -85,10 +87,10 @@ delarationlist:
 		| delarationlist PUN_COM declare
 		;
 
-declare: identifier								{ /*insert(table, $1, current_dt);*/ }
-		| identifier PUN_SQO exp PUN_SQC		{ /*insert(table, $1, current_dt);*/ }
-		| identifier OP_ASS arithmetic_exp		{ /*insert(table, $1, current_dt);*/ }
-		| identifier OP_ASS OP_AND identifier	{ if(is_present(table, $4)==-1){ printf("\n%s does not exist\n", $4); yyerror("Undeclared variable\n"); } /*else insert(table, $1, current_dt);*/ }
+declare: identifier								{ insert(table, $1, current_dt); }
+		| identifier PUN_SQO exp PUN_SQC		{ insert(table, $1, current_dt); }
+		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt); }
+		| identifier OP_ASS OP_AND identifier	{ if(is_present(table, $4)==-1){ printf("\n%s does not exist\n", $4); yyerror("Undeclared variable\n"); } else insert(table, $1, current_dt); }
 		;
 
 exp:	arithmetic_exp
@@ -159,11 +161,11 @@ statements: statement
 statement: if
 		| for
 		| while
-		| RETURN ';'
-		| RETURN exp ';'
-		| CONTINUE ';'
-		| BREAK ';'
-		| function_call ';'
+		| RETURN SEMICOLON
+		| RETURN exp SEMICOLON
+		| CONTINUE SEMICOLON
+		| BREAK SEMICOLON
+		| function_call SEMICOLON
 		| declaration			
 		;
 
@@ -180,8 +182,8 @@ for:	FOR PUN_BO for_exp for_exp exp PUN_BC scoped_unscoped_statements
 		|FOR PUN_BO for_exp for_exp PUN_BC scoped_unscoped_statements
 		;
 
-for_exp: exp ';'
-		| ';'
+for_exp: exp SEMICOLON
+		| SEMICOLON
 		;
 
 while:	WHILE PUN_BO exp PUN_BC scoped_unscoped_statements
