@@ -42,7 +42,7 @@
 // Constants
 %token CONSTANT_HEX CONSTANT_INT CONSTANT_CHAR CONSTANT_STR
 
-%token <token_name> identifier
+%type <token_name> identifier
 
 %left PUN_COM
 %right OP_ASS
@@ -65,20 +65,20 @@ program: declaration
 		| program function
 		;
 
-declaration:  type delarationlist ';'
+declaration: type delarationlist ';'
 		;
 
-type:	INT 					{current_dt = INT;}
-		| LONG 					{current_dt = LONG;}
-		| LLONG 				{current_dt = LLONG;}
-		| SHORT 				{current_dt = SHORT;}
-		| CHAR					{current_dt = CHAR;}
+type:	INT 					{current_dt = I;}
+		| LONG 					{current_dt = L;}
+		| LLONG 				{current_dt = LL;}
+		| SHORT 				{current_dt = SH;}
+		| CHAR					{current_dt = CH;}
 		| type OP_MUL			{current_dt = PTR;}
 		;
 
-declarationlist:
+delarationlist:
 		| declare
-		| declarationlist PUN_COM declare
+		| delarationlist PUN_COM declare
 		;
 
 declare: identifier								{ insert($1.token_name, lineno); }
@@ -91,18 +91,18 @@ exp:	arithmetic_exp
 		| assignment_exp
 		;
 
-arithmetic_exp: arithmetic_expr OP_AND arithmetic_expr
-		| arithmetic_expr OP_OR arithmetic_expr
-		| arithmetic_expr OP_LT arithmetic_expr
-		| arithmetic_expr OP_GT arithmetic_expr		
-		| arithmetic_expr OP_LE arithmetic_expr
-		| arithmetic_expr OP_GE arithmetic_expr
-		| arithmetic_expr OP_EE arithmetic_expr
-		| arithmetic_expr OP_SUB arithmetic_expr
-		| arithmetic_expr OP_ADD arithmetic_expr
-		| arithmetic_expr OP_MUL arithmetic_expr
-		| arithmetic_expr OP_DIV arithmetic_expr
-		| arithmetic_expr OP_MOD arithmetic_expr
+arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp
+		| arithmetic_exp OP_OR arithmetic_exp
+		| arithmetic_exp OP_LT arithmetic_exp
+		| arithmetic_exp OP_GT arithmetic_exp		
+		| arithmetic_exp OP_LE arithmetic_exp
+		| arithmetic_exp OP_GE arithmetic_exp
+		| arithmetic_exp OP_EE arithmetic_exp
+		| arithmetic_exp OP_SUB arithmetic_exp
+		| arithmetic_exp OP_ADD arithmetic_exp
+		| arithmetic_exp OP_MUL arithmetic_exp
+		| arithmetic_exp OP_DIV arithmetic_exp
+		| arithmetic_exp OP_MOD arithmetic_exp
 		| OP_SUB arithmetic_exp %prec UMINUS
 		| OP_ADD arithmetic_exp %prec UMINUS
 		| PUN_BO arithmetic_exp PUN_BC
@@ -167,7 +167,7 @@ if:		IF PUN_BO exp PUN_BC scoped_unscoped_statements %prec LOWER_THAN_ELSE
     	;
 
 
-for:	FOR PUN_BO for_exp for_exp exp PUN_BC scoped_unscoped_statement
+for:	FOR PUN_BO for_exp for_exp exp PUN_BC scoped_unscoped_statements
 		|FOR PUN_BO for_exp for_exp PUN_BC scoped_unscoped_statements
 		;
 
