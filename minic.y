@@ -4,6 +4,7 @@
 	void yyerror(char *);
 
 	symtable ** table = NULL;
+	symtable ** stable = NULL;
 
 	datatype current_dt;
 %}
@@ -93,7 +94,6 @@ declare: identifier								{ insert(table, $1, current_dt); }
 		| identifier OP_ASS function_call		{ insert(table, $1, current_dt); }
 		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt); }
 		| identifier OP_ASS OP_ADR identifier	{ if(is_present(table, $4)!=-1){ printf("\n%s does not exist\n", $4); yyerror("Undeclared variable\n"); } else insert(table, $1, current_dt); }
-		| point_exp
 		;
 
 exp:	arithmetic_exp
@@ -161,7 +161,7 @@ functionparameters: PUN_BO typed_parameterlist PUN_BC
 		|PUN_BO PUN_BC
 		;
 
-typed_parameterlist: type identifier
+typed_parameterlist: type identifier				{addIfNotPresent(table, $2, current_dt);}
 		| type constant
 		| typed_parameterlist PUN_COM identifier
 		| typed_parameterlist PUN_COM constant
