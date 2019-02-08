@@ -14,4 +14,4 @@ Repo for Mini C Compiler using lex, yaac
 * `gcc .\y.tab.c .\symboltable.c` **On Windows based** <br/> `gcc y.tab.c symboltable.c -ll -ly`  **On linux based**
 11
 
-* `.\a.exe .\test-case-1.c` **On Windows based** <br /> `./a.exe ./test-case-1.c` **On linux based**
+* `.\a.exe .\test-case-1.c` **On Windows based** <br /> `./a.out ./test-case-1.c` **On linux based**
