@@ -1,13 +1,14 @@
 #include<stdio.h> 
 
-void fun(char aohs){
+int fun(char aohs){
+   int ah = 0;
    return 0;
 }
+
 int main(){
-   int * y,a;;
+   int * y;
+   int a;
    int x = 100 *10 - 20 + 100 %200;
-   
-   int b[x+2];
    
    if(a==9)  {
       int c=9;/* code */
