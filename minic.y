@@ -278,7 +278,7 @@ for_exp: exp SEMICOLON
 while:	WHILE PUN_BO exp PUN_BC scoped_unscoped_statements
 		;
 
-%%                     /* C code */
+%%
 
 #include "lex.yy.c"
 
