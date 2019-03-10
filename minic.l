@@ -13,6 +13,8 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 
 /* Exclusive states */
 /* [+\-]?{digit}{1,5}"."{digit}{1,6} {return CONSTANT_FLOAT;}*/
+/* [+\-]?[0][x|X]{hex}               		{return CONSTANT_HEX;} */
+
 
 %x CMNT
 %x INCLUDE
@@ -40,9 +42,8 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 
 {identifier}                      		{yylval.token_name = yytext; return ID;}
 
-[+\-]?[0][x|X]{hex}               		{return CONSTANT_HEX;}
 [+\-]?{digit}{1,5}                		{yylval.int_val = atoi(yytext); return CONSTANT_INT;}
-['].[']                           		{yylval.cha_val = yytext[1]; return CONSTANT_CHAR;}
+['].[']                           		{yylval.char_val = yytext[1]; return CONSTANT_CHAR;}
 
 
 "/*"                              		{printf("Multiline comment start at lineno %d\n", lineno); cmnt_strt = lineno; BEGIN CMNT;}
@@ -66,7 +67,7 @@ constant  {digit}+|{digit}+"."{digit}+|["].*["]|['].[']
 
 "//".*                            		{printf("Single line comment at lineno %d\n", lineno);};
 "*/"                              		{printf("ERROR %d : Invalid comments\n",lineno); yyterminate();}
-\"(\\.|[^"\\])*\"                 		{printf("string         : %s\n",yytext); yytext.string_val = yytext; return CONSTANT_STR;}
+\"(\\.|[^"\\])*\"                 		{printf("string         : %s\n",yytext); yylval.string_val = yytext; return CONSTANT_STR;}
 \"[^\"\n]*$                       		{printf("ERROR %d : Unterminated string %s\n",lineno,yytext);yyterminate();}
 {digit}+({letter}|_)+	            	{printf("ERROR %d : Illegal identifier name %s\n",lineno,yytext);yyterminate();}
 \n                                		{lineno++;}

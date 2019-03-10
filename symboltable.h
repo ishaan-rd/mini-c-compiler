@@ -39,11 +39,11 @@ typedef struct sym_t
 
 symtable **init();
 
-int insert(symtable **table, char *token_name, int token_type, char *scope, val value);
+int insert(symtable **table, char *token_name, int token_type, char *scope);
 
-int addIfNotPresent(symtable **table, char *token_name, int token_type, char *scope, val value);
+int addIfNotPresent(symtable **table, char *token_name, int token_type, char *scope);
 
-int return_type(char *token_name, char *scope);
+int return_type(symtable **table, char *token_name, char *scope);
 
 int yylex();
 

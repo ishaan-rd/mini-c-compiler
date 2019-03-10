@@ -72,7 +72,7 @@
 %}
 
 // Symbol table
-%union {char* token_name; int int_val, char char_val, char * string_val}
+%union {char* token_name; int int_val; char char_val; char * string_val;}
 
 %token SEMICOLON 
 
@@ -141,16 +141,16 @@
 
 %%
 
-program: declaration			{set_scope("EXT")}
-		| function				{set_scope("EXT")}		
-		| program declaration	{set_scope("EXT")}
-		| program function		{set_scope("EXT")}
+program: declaration			{set_scope("EXT");}
+		| function				{set_scope("EXT");}		
+		| program declaration	{set_scope("EXT");}
+		| program function		{set_scope("EXT");}
 		;
 
 declaration: type delarationlist SEMICOLON
 		;
 
-type:	INT 					{$$ = I; current_dt = I}
+type:	INT 					{$$ = I; current_dt = I;}
 		| CHAR					{$$ = current_dt; current_dt = CH;}
 		| VOID 					{$$ = current_dt; current_dt = VO;}
 		| type OP_MUL			{$$ = current_dt; current_dt =  $1 * $1;}
@@ -187,26 +187,26 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{ $$ = $1 && $3;}
 		| OP_SUB arithmetic_exp %prec UMINUS				{ $$ = -$2;}
 		| OP_ADD arithmetic_exp %prec UMINUS				{ $$ = +$2;}
 		| PUN_BO arithmetic_exp PUN_BC						{ $$ = ($2);}
-		| identifier										{ $$ = 2; id_present($1); check_type(identifier, I); }
-		| CONSTANT_INT										{ $$ = $1.int_val;}
+		| identifier										{ $$ = 2; id_present($1); check_type($1, I); }
+		| CONSTANT_INT										{ $$ = $1;}
 		;
 
-assignment_exp:  identifier OP_ASS arithmetic_exp			{is_present($1); check_type($1, I);}
-		| identifier OP_ASS CONSTANT_CHAR					{is_present($1); check_type($1, CH);}
-		| identifier OP_ASS function_call					{is_present($1); check_type($1, $3);}
-		| identifier OP_ASS OP_ADR identifier				{is_present($1); is_present($4); check_type($1, type_get($4) * type_get($4))}
-		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { is_present($1); id_present($3); if($5 < 0){yyerror("Array index less than 0");} check_type($3, type_get($1) * type_get($1))}
-		| identifier OP_ASS point_exp						{is_present($1); check_type($1, $3);}
-		| identifier OP_INC									{is_present($1); check_type($1, I);}
-		| identifier OP_DEC									{is_present($1); check_type($1, I);}
+assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type($1, I);}
+		| identifier OP_ASS CONSTANT_CHAR					{id_present($1); check_type($1, CH);}
+		| identifier OP_ASS function_call					{id_present($1); check_type($1, $3);}
+		| identifier OP_ASS OP_ADR identifier				{id_present($1); id_present($4); int x =  type_get($4); check_type($1, x * x);}
+		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { id_present($1); id_present($3); if($5 < 0){yyerror("Array index less than 0");} int x = type_get($1); check_type($3, x * x);}
+		| identifier OP_ASS point_exp						{id_present($1); check_type($1, $3);}
+		| identifier OP_INC									{id_present($1); check_type($1, I);}
+		| identifier OP_DEC									{id_present($1); check_type($1, I);}
 		;
 
 point_exp: OP_MUL identifier								{$$ = type_get($2) * type_get($2);}
 		| OP_MUL point_exp									{$$ = $2 * $2;}
 		;
 
-function_call: identifier PUN_BO untyped_parameterlist PUN_BC 	{is_present($1); $$ = type_get_fc($1);}
-		| identifier PUN_BO PUN_BC							{is_present($1); $$ = type_get_fc($1);}
+function_call: identifier PUN_BO untyped_parameterlist PUN_BC 	{id_present($1); $$ = type_get_fc($1);}
+		| identifier PUN_BO PUN_BC							{id_present($1); $$ = type_get_fc($1);}
 		;
 
 identifier: ID												{$$ = strdup($1);}
@@ -232,7 +232,7 @@ functionparameters: PUN_BO typed_parameterlist PUN_BC
 		;
 
 typed_parameterlist: type identifier							{parameter_list = add_parameter(parameter_list, $2, $1);}
-		| typed_parameterlist PUN_COM type identifier			{parameter_list = add_parameter(parameter_list, $3, $4);}
+		| typed_parameterlist PUN_COM type identifier			{parameter_list = add_parameter(parameter_list, $4, $3);}
 		;
 
 scoped_statements: PUN_FO statements PUN_FC
