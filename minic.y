@@ -202,7 +202,7 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{is_present($1); check_type(
 		;
 
 point_exp: OP_MUL identifier								{$$ = type_get($2) * type_get($2);}
-		| OP_MUL point_exp									{$$ = $1 * $1;}
+		| OP_MUL point_exp									{$$ = $2 * $2;}
 		;
 
 function_call: identifier PUN_BO untyped_parameterlist PUN_BC 	{is_present($1); $$ = type_get_fc($1);}
