@@ -6,11 +6,12 @@
 	symtable ** table = NULL;
 	symtable ** stable = NULL;
 
-	datatype current_dt;
+	int current_dt;
+	char * scope;
 %}
 
 // Symbol table
-%union {char* token_name;}
+%union {char* token_name; int int_val, char char_val, char * string_val}
 
 %token SEMICOLON
 
@@ -46,7 +47,11 @@
 %token PUN_COM PUN_BO PUN_BC PUN_FO PUN_FC PUN_SQO PUN_SQC
 
 // Constants
-%token CONSTANT_HEX CONSTANT_INT CONSTANT_CHAR CONSTANT_STR
+%token <int_val> CONSTANT_INT 
+
+%token <char_val> CONSTANT_CHAR 
+
+%token <string_val> CONSTANT_STR
 
 %type <token_name> identifier
 
@@ -64,24 +69,28 @@
 %nonassoc ELSE
 
 %start program
+
+
+
+// | LONG 					{current_dt = L;}
+// | LLONG 				{current_dt = LL;}
+// | SHORT 				{current_dt = SH;}
+
 %%
 
-program: declaration
-		| function
-		| program declaration
-		| program function
+program: declaration			{strcpy(scope, "EXT")}
+		| function				{strcpy(scope, "EXT")}		
+		| program declaration	{strcpy(scope, "EXT")}
+		| program function		{strcpy(scope, "EXT")}
 		;
 
 declaration: type delarationlist SEMICOLON
 		;
 
-type:	INT 					{current_dt = I;}
-		| LONG 					{current_dt = L;}
-		| LLONG 				{current_dt = LL;}
-		| SHORT 				{current_dt = SH;}
-		| CHAR					{current_dt = CH;}
-		| VOID 					{current_dt = VO;}
-		| type OP_MUL			{current_dt = PTR;}
+type:	INT 					{$$ = I; current_dt = I}
+		| CHAR					{$$ = current_dt; current_dt = CH;}
+		| VOID 					{$$ = current_dt; current_dt = VO;}
+		| type OP_MUL			{$$ = current_dt; current_dt =  $1 * $1;}
 		;
 
 delarationlist:
@@ -100,26 +109,27 @@ exp:	arithmetic_exp
 		| assignment_exp
 		;
 
-arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp
-		| arithmetic_exp OP_OR arithmetic_exp
-		| arithmetic_exp OP_LT arithmetic_exp
-		| arithmetic_exp OP_GT arithmetic_exp		
-		| arithmetic_exp OP_LE arithmetic_exp
-		| arithmetic_exp OP_GE arithmetic_exp
-		| arithmetic_exp OP_EE arithmetic_exp
-		| arithmetic_exp OP_SUB arithmetic_exp
-		| arithmetic_exp OP_ADD arithmetic_exp
-		| arithmetic_exp OP_MUL arithmetic_exp
-		| arithmetic_exp OP_DIV arithmetic_exp
-		| arithmetic_exp OP_MOD arithmetic_exp
-		| OP_SUB arithmetic_exp %prec UMINUS
-		| OP_ADD arithmetic_exp %prec UMINUS
-		| PUN_BO arithmetic_exp PUN_BC
+arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{ $$ = $1 && $2;}
+		| arithmetic_exp OP_OR arithmetic_exp				{ $$ = $1 || $2;}
+		| arithmetic_exp OP_LT arithmetic_exp				{ $$ = $1 < $2;}
+		| arithmetic_exp OP_GT arithmetic_exp				{ $$ = $1 > $2;}
+		| arithmetic_exp OP_LE arithmetic_exp				{ $$ = $1 <= $2;}
+		| arithmetic_exp OP_GE arithmetic_exp				{ $$ = $1 >= $2;}
+		| arithmetic_exp OP_EE arithmetic_exp				{ $$ = $1 == $2;}
+		| arithmetic_exp OP_SUB arithmetic_exp				{ $$ = $1 - $2;}
+		| arithmetic_exp OP_ADD arithmetic_exp				{ $$ = $1 + $2;}
+		| arithmetic_exp OP_MUL arithmetic_exp				{ $$ = $1 * $2;}
+		| arithmetic_exp OP_DIV arithmetic_exp				{ $$ = $1 / $2;}
+		| arithmetic_exp OP_MOD arithmetic_exp				{ $$ = $1 % $2;}
+		| OP_SUB arithmetic_exp %prec UMINUS				{ $$ = -$1;}
+		| OP_ADD arithmetic_exp %prec UMINUS				{ $$ = +$1;}
+		| PUN_BO arithmetic_exp PUN_BC						{ $$ = ($1);}
 		| identifier										{ if(is_present(table, $1)!=-1){ printf("\n%s does not exist\n", $1); yyerror("Undeclared variable\n"); } }
-		| constant
+		| CONSTANT_INT										{ $$ = $1;}
 		;
 
 assignment_exp:  identifier OP_ASS arithmetic_exp
+		| identifier OP_ASS CONSTANT_CHAR
 		| identifier OP_ASS function_call
 		| identifier OP_ASS OP_ADR identifier
 		| identifier OP_ASS identifier PUN_SQO exp PUN_SQC  { if(is_present(table, $3)!=-1){ printf("\n%s does not exist\n", $3); yyerror("Undeclared variable\n"); } }
@@ -139,17 +149,14 @@ function_call: identifier PUN_BO untyped_parameterlist PUN_BC {addIfNotPresent(t
 identifier: ID				{$$ = strdup($1);}
 		;
 
-constant: CONSTANT_CHAR
-		| CONSTANT_HEX
-		| CONSTANT_INT
-		;
-
 untyped_parameterlist: identifier
-		| constant
+		| CONSTANT_INT
+		| CONSTANT_CHAR
 		| CONSTANT_STR
 		| point_exp
 		| untyped_parameterlist PUN_COM identifier
-		| untyped_parameterlist PUN_COM constant
+		| untyped_parameterlist PUN_COM CONSTANT_INT
+		| untyped_parameterlist PUN_COM CONSTANT_CHAR
 		| untyped_parameterlist PUN_COM CONSTANT_STR
 		| untyped_parameterlist PUN_COM point_exp
 		;
@@ -162,9 +169,7 @@ functionparameters: PUN_BO typed_parameterlist PUN_BC
 		;
 
 typed_parameterlist: type identifier				{addIfNotPresent(table, $2, current_dt);}
-		| type constant
 		| typed_parameterlist PUN_COM identifier
-		| typed_parameterlist PUN_COM constant
 		;
 
 scoped_statements: PUN_FO statements PUN_FC

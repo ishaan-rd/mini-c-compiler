@@ -32,11 +32,11 @@ int hash(char *token_name )
 		return -h;
 }
 
-int is_present(symtable ** table, char * token_name){
+int is_present(symtable ** table, char * token_name, char * scope){
 	int h = hash(token_name);
 	symtable * ptr = table[h];
 	while(ptr!=NULL){
-		if(strcmp(ptr->token_name, token_name) == 0)
+		if(strcmp(ptr->token_name, token_name) == 0 && strcmp(ptr->scope, scope) == 0)
 			break;
 	}
 
@@ -46,18 +46,21 @@ int is_present(symtable ** table, char * token_name){
 		return -1;
 }
 
-symtable * create_entry(char * token_name, datatype token_type){
+symtable * create_entry(char * token_name, int token_type,  char * scope, val value){
 	symtable * entry = (symtable *)malloc(sizeof(symtable));
 	entry->token_name = (char *)malloc(sizeof(token_name) + 1);
 	strcpy(entry->token_name, token_name);
+	entry->scope = (char *)malloc(sizeof(scope) + 1);
+	strcpy(entry->scope, scope);
+	entry->value = value;
 	entry->token_type = token_type;
 	entry->pred = NULL;
 	return entry;
 }
 
 // Return 0 if no error else return 1
-int insert(symtable ** table, char * token_name, datatype token_type){
-	int h = is_present(table, token_name);
+int insert(symtable ** table, char * token_name, int token_type, char * scope, val value){
+	int h = is_present(table, token_name, scope);
 
 	if(h == -1){
 		printf("\n%s already exists. ", token_name);
@@ -66,9 +69,9 @@ int insert(symtable ** table, char * token_name, datatype token_type){
 	}
 
 	if(table[h] == NULL)
-		table[h] = create_entry(token_name, token_type);
+		table[h] = create_entry(token_name, token_type, scope, value);
 	else{
-		symtable * entry = create_entry(token_name, token_type);
+		symtable * entry = create_entry(token_name, token_type, scope, value);
 		symtable * ptr = table[h];
 		entry->pred = ptr;
 		table[h] = entry;
@@ -77,13 +80,13 @@ int insert(symtable ** table, char * token_name, datatype token_type){
 	return 0;
 }
 
-int addIfNotPresent(symtable ** table, char * token_name, datatype token_type){
-	int h = is_present(table, token_name);
+int addIfNotPresent(symtable ** table, char * token_name, int token_type, char * scope, val value){
+	int h = is_present(table, token_name, scope);
 
 	if(table[h] == NULL)
-		table[h] = create_entry(token_name, token_type);
+		table[h] = create_entry(token_name, token_type, scope, value);
 	else{
-		symtable * entry = create_entry(token_name, token_type);
+		symtable * entry = create_entry(token_name, token_type, scope, value);
 		symtable * ptr = table[h];
 		entry->pred = ptr;
 		table[h] = entry;
