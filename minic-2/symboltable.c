@@ -60,8 +60,8 @@ int insert(symtable ** table, char * token_name, datatype token_type){
 	int h = is_present(table, token_name);
 
 	if(h == -1){
-		printf("%s already exists\n", token_name);
-		fprintf (stderr, "\nRedeclared variable\n");
+		printf("\n%s already exists. ", token_name);
+		fprintf (stderr, "Redeclared variable\n\n");
 		return 1;
 	}
 
