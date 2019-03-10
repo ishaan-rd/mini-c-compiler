@@ -8,29 +8,65 @@
 
 	int current_dt;
 	char * scope;
-	
+	parameter * parameter_list = NULL;
+
 	void set_scope(char * scp)
 	{
 		scope = (char *)malloc(sizeof(char)*(strlen(scp)+1));
 		strcpy(scope, scp);
 	}
 
-	val value;
+	// val value;
 
-	void set_int(int val)
+	// void set_int(int val)
+	// {
+	// 	value.intval = val;
+	// }
+
+	// void set_char(char val)
+	// {
+	// 	value.charval = val;
+	// }
+
+	// void set_str(char * val)
+	// {
+	// 	value.str_val = (char *)malloc(sizeof(char)*(strlen(val)+1));
+	// 	strcpy(value.str_val, val);
+	// }
+
+	void id_present(char * id)
 	{
-		value.intval = val;
+ 		if(is_present(table, id, scope)!=-1)
+		{ 
+			printf("\n%s does not exist\n", id); 
+			yyerror("Undeclared variable\n"); 
+		} 
 	}
 
-	void set_char(char val)
+	int type_get(char * id)
 	{
-		value.charval = val;
+		return return_type(table, id, scope);
 	}
 
-	void set_str(char * val)
+	int type_get_fc(char * id)
 	{
-		value.str_val = (char *)malloc(sizeof(char)*(strlen(val)+1));
-		strcpy(value.str_val, val);
+		return return_type(table, id, "EXT") / FUNCTION;
+	}
+
+	void check_type(char * id, int tp)
+	{
+		if( tp!=return_type(table, id, scope) )
+		{
+			yyerror("invalid type variable\n"); 
+		}
+	}
+
+	void check_both_type(int tp1, int tp2)
+	{
+		if( tp1!=tp2 )
+		{
+			yyerror("invalid type variable\n"); 
+		}
 	}
 
 %}
@@ -80,8 +116,7 @@
 
 %type <token_name> identifier
 
-%type <int_val> type 
-%type <int_val> arithmetic_exp
+%type <int_val> type arithmetic_exp function_call point_exp
 
 %left PUN_COM
 %left OP_OR OP_AND
@@ -100,7 +135,7 @@
 
 
 
-// | LONG 					{current_dt = L;}
+// | LONG 				{current_dt = L;}
 // | LLONG 				{current_dt = LL;}
 // | SHORT 				{current_dt = SH;}
 
@@ -126,11 +161,11 @@ delarationlist:
 		| delarationlist PUN_COM declare
 		;
 
-declare: identifier								{ insert(table, $1, current_dt); }
-		| identifier PUN_SQO exp PUN_SQC		{ insert(table, $1, current_dt); }
-		| identifier OP_ASS function_call		{ insert(table, $1, current_dt); }
-		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt); }
-		| identifier OP_ASS OP_ADR identifier	{ if(is_present(table, $4)!=-1){ printf("\n%s does not exist\n", $4); yyerror("Undeclared variable\n"); } else insert(table, $1, current_dt); }
+declare: identifier								{ insert(table, $1, current_dt, scope); }
+		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, scope); if($3 <= 0){yyerror("Array size less than 1");}}
+		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3);}
+		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, I);}
+		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, scope); int x = type_get($4); check_both_type(current_dt, x*x);}
 		;
 
 exp:	arithmetic_exp
@@ -152,29 +187,29 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{ $$ = $1 && $3;}
 		| OP_SUB arithmetic_exp %prec UMINUS				{ $$ = -$2;}
 		| OP_ADD arithmetic_exp %prec UMINUS				{ $$ = +$2;}
 		| PUN_BO arithmetic_exp PUN_BC						{ $$ = ($2);}
-		| identifier										{ $$ = 2; if(is_present(table, $1)!=-1){ printf("\n%s does not exist\n", $1); yyerror("Undeclared variable\n"); } }
+		| identifier										{ $$ = 2; id_present($1); check_type(identifier, I); }
 		| CONSTANT_INT										{ $$ = $1.int_val;}
 		;
 
-assignment_exp:  identifier OP_ASS arithmetic_exp			{}
-		| identifier OP_ASS CONSTANT_CHAR		
-		| identifier OP_ASS function_call		
-		| identifier OP_ASS OP_ADR identifier	
-		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { if(is_present(table, $3)!=-1){ printf("\n%s does not exist\n", $3); yyerror("Undeclared variable\n"); } }
-		| identifier OP_ASS point_exp
-		| identifier OP_INC
-		| identifier OP_DEC
+assignment_exp:  identifier OP_ASS arithmetic_exp			{is_present($1); check_type($1, I);}
+		| identifier OP_ASS CONSTANT_CHAR					{is_present($1); check_type($1, CH);}
+		| identifier OP_ASS function_call					{is_present($1); check_type($1, $3);}
+		| identifier OP_ASS OP_ADR identifier				{is_present($1); is_present($4); check_type($1, type_get($4) * type_get($4))}
+		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { is_present($1); id_present($3); if($5 < 0){yyerror("Array index less than 0");} check_type($3, type_get($1) * type_get($1))}
+		| identifier OP_ASS point_exp						{is_present($1); check_type($1, $3);}
+		| identifier OP_INC									{is_present($1); check_type($1, I);}
+		| identifier OP_DEC									{is_present($1); check_type($1, I);}
 		;
 
-point_exp: OP_MUL identifier
-		| OP_MUL point_exp
+point_exp: OP_MUL identifier								{$$ = type_get($2) * type_get($2);}
+		| OP_MUL point_exp									{$$ = $1 * $1;}
 		;
 
-function_call: identifier PUN_BO untyped_parameterlist PUN_BC {addIfNotPresent(table, $1, FUNCTION);}
-		| identifier PUN_BO PUN_BC
+function_call: identifier PUN_BO untyped_parameterlist PUN_BC 	{is_present($1); $$ = type_get_fc($1);}
+		| identifier PUN_BO PUN_BC							{is_present($1); $$ = type_get_fc($1);}
 		;
 
-identifier: ID				{$$ = strdup($1);}
+identifier: ID												{$$ = strdup($1);}
 		;
 
 untyped_parameterlist: identifier
@@ -189,15 +224,15 @@ untyped_parameterlist: identifier
 		| untyped_parameterlist PUN_COM point_exp
 		;
 
-function: type identifier functionparameters scoped_statements	{insert(table, strdup($2), FUNCTION * $1, scope, value); set_scope($2);}
+function: type identifier functionparameters scoped_statements	{insert(table, strdup($2), FUNCTION * $1, scope); set_scope($2); parameter_to_symtable(table, parameter_list, scope); parameter_list = NULL;}
 		;
 
 functionparameters: PUN_BO typed_parameterlist PUN_BC
 		|PUN_BO PUN_BC
 		;
 
-typed_parameterlist: type identifier				{addIfNotPresent(table, $2, current_dt);}
-		| typed_parameterlist PUN_COM identifier
+typed_parameterlist: type identifier							{parameter_list = add_parameter(parameter_list, $2, $1);}
+		| typed_parameterlist PUN_COM type identifier			{parameter_list = add_parameter(parameter_list, $3, $4);}
 		;
 
 scoped_statements: PUN_FO statements PUN_FC

@@ -14,11 +14,19 @@
 #define VO 5
 #define FUNCTION 7
 
-typedef struct vl{
+typedef struct vl
+{
 	int intval;
 	char charval;
-	char * strval; 
+	char *strval;
 } val;
+
+typedef struct pl
+{
+	char *id;
+	int type;
+	struct pl *next;
+} parameter;
 
 typedef struct sym_t
 {
@@ -31,14 +39,20 @@ typedef struct sym_t
 
 symtable **init();
 
-int insert(symtable **table, char *token_name, int token_type, char * scope, val value);
+int insert(symtable **table, char *token_name, int token_type, char *scope, val value);
 
-int addIfNotPresent(symtable **table, char *token_name, int token_type, char * scope, val value);
+int addIfNotPresent(symtable **table, char *token_name, int token_type, char *scope, val value);
+
+int return_type(char *token_name, char *scope);
 
 int yylex();
 
-int is_present(symtable **table, char *token_name, char * scope);
+int is_present(symtable **table, char *token_name, char *scope);
 
 void display(symtable **table);
+
+parameter * add_parameter(parameter *parameter_list, char *id, int type);
+
+void parameter_to_symtable(symtable ** table, parameter *parameter_list, char *scope);
 
 #endif
