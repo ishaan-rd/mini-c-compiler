@@ -129,16 +129,16 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{ $$ = $1 && $2;}
 		;
 
 assignment_exp:  identifier OP_ASS arithmetic_exp
-		| identifier OP_ASS CONSTANT_CHAR
-		| identifier OP_ASS function_call
-		| identifier OP_ASS OP_ADR identifier
-		| identifier OP_ASS identifier PUN_SQO exp PUN_SQC  { if(is_present(table, $3)!=-1){ printf("\n%s does not exist\n", $3); yyerror("Undeclared variable\n"); } }
+		| identifier OP_ASS CONSTANT_CHAR		
+		| identifier OP_ASS function_call		
+		| identifier OP_ASS OP_ADR identifier	
+		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { if(is_present(table, $3)!=-1){ printf("\n%s does not exist\n", $3); yyerror("Undeclared variable\n"); } }
 		| identifier OP_ASS point_exp
 		| identifier OP_INC
 		| identifier OP_DEC
 		;
 
-point_exp: OP_MUL identifier
+point_exp: OP_MUL identifier 
 		| OP_MUL point_exp
 		;
 
