@@ -8,12 +8,37 @@
 
 	int current_dt;
 	char * scope;
+	
+	void set_scope(char * scp)
+	{
+		scope = (char *)malloc(sizeof(char)*(strlen(scp)+1));
+		strcpy(scope, scp);
+	}
+
+	val value;
+
+	void set_int(int val)
+	{
+		value.intval = val;
+	}
+
+	void set_char(char val)
+	{
+		value.charval = val;
+	}
+
+	void set_str(char * val)
+	{
+		value.str_val = (char *)malloc(sizeof(char)*(strlen(val)+1));
+		strcpy(value.str_val, val);
+	}
+
 %}
 
 // Symbol table
 %union {char* token_name; int int_val, char char_val, char * string_val}
 
-%token SEMICOLON
+%token SEMICOLON 
 
 // Data types
 %token INT LONG LLONG SHORT CHAR VOID
@@ -55,6 +80,9 @@
 
 %type <token_name> identifier
 
+%type <int_val> type 
+%type <int_val> arithmetic_exp
+
 %left PUN_COM
 %left OP_OR OP_AND
 %left OP_EE OP_NE
@@ -78,10 +106,10 @@
 
 %%
 
-program: declaration			{strcpy(scope, "EXT")}
-		| function				{strcpy(scope, "EXT")}		
-		| program declaration	{strcpy(scope, "EXT")}
-		| program function		{strcpy(scope, "EXT")}
+program: declaration			{set_scope("EXT")}
+		| function				{set_scope("EXT")}		
+		| program declaration	{set_scope("EXT")}
+		| program function		{set_scope("EXT")}
 		;
 
 declaration: type delarationlist SEMICOLON
@@ -109,26 +137,26 @@ exp:	arithmetic_exp
 		| assignment_exp
 		;
 
-arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{ $$ = $1 && $2;}
-		| arithmetic_exp OP_OR arithmetic_exp				{ $$ = $1 || $2;}
-		| arithmetic_exp OP_LT arithmetic_exp				{ $$ = $1 < $2;}
-		| arithmetic_exp OP_GT arithmetic_exp				{ $$ = $1 > $2;}
-		| arithmetic_exp OP_LE arithmetic_exp				{ $$ = $1 <= $2;}
-		| arithmetic_exp OP_GE arithmetic_exp				{ $$ = $1 >= $2;}
-		| arithmetic_exp OP_EE arithmetic_exp				{ $$ = $1 == $2;}
-		| arithmetic_exp OP_SUB arithmetic_exp				{ $$ = $1 - $2;}
-		| arithmetic_exp OP_ADD arithmetic_exp				{ $$ = $1 + $2;}
-		| arithmetic_exp OP_MUL arithmetic_exp				{ $$ = $1 * $2;}
-		| arithmetic_exp OP_DIV arithmetic_exp				{ $$ = $1 / $2;}
-		| arithmetic_exp OP_MOD arithmetic_exp				{ $$ = $1 % $2;}
-		| OP_SUB arithmetic_exp %prec UMINUS				{ $$ = -$1;}
-		| OP_ADD arithmetic_exp %prec UMINUS				{ $$ = +$1;}
-		| PUN_BO arithmetic_exp PUN_BC						{ $$ = ($1);}
-		| identifier										{ if(is_present(table, $1)!=-1){ printf("\n%s does not exist\n", $1); yyerror("Undeclared variable\n"); } }
-		| CONSTANT_INT										{ $$ = $1;}
+arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{ $$ = $1 && $3;}
+		| arithmetic_exp OP_OR arithmetic_exp				{ $$ = $1 || $3;}
+		| arithmetic_exp OP_LT arithmetic_exp				{ $$ = $1 < $3;}
+		| arithmetic_exp OP_GT arithmetic_exp				{ $$ = $1 > $3;}
+		| arithmetic_exp OP_LE arithmetic_exp				{ $$ = $1 <= $3;}
+		| arithmetic_exp OP_GE arithmetic_exp				{ $$ = $1 >= $3;}
+		| arithmetic_exp OP_EE arithmetic_exp				{ $$ = $1 == $3;}
+		| arithmetic_exp OP_SUB arithmetic_exp				{ $$ = $1 - $3;}
+		| arithmetic_exp OP_ADD arithmetic_exp				{ $$ = $1 + $3;}
+		| arithmetic_exp OP_MUL arithmetic_exp				{ $$ = $1 * $3;}
+		| arithmetic_exp OP_DIV arithmetic_exp				{ $$ = $1 / $3;}
+		| arithmetic_exp OP_MOD arithmetic_exp				{ $$ = $1 % $3;}
+		| OP_SUB arithmetic_exp %prec UMINUS				{ $$ = -$2;}
+		| OP_ADD arithmetic_exp %prec UMINUS				{ $$ = +$2;}
+		| PUN_BO arithmetic_exp PUN_BC						{ $$ = ($2);}
+		| identifier										{ $$ = 2; if(is_present(table, $1)!=-1){ printf("\n%s does not exist\n", $1); yyerror("Undeclared variable\n"); } }
+		| CONSTANT_INT										{ $$ = $1.int_val;}
 		;
 
-assignment_exp:  identifier OP_ASS arithmetic_exp
+assignment_exp:  identifier OP_ASS arithmetic_exp			{}
 		| identifier OP_ASS CONSTANT_CHAR		
 		| identifier OP_ASS function_call		
 		| identifier OP_ASS OP_ADR identifier	
@@ -138,7 +166,7 @@ assignment_exp:  identifier OP_ASS arithmetic_exp
 		| identifier OP_DEC
 		;
 
-point_exp: OP_MUL identifier 
+point_exp: OP_MUL identifier
 		| OP_MUL point_exp
 		;
 
@@ -161,7 +189,7 @@ untyped_parameterlist: identifier
 		| untyped_parameterlist PUN_COM point_exp
 		;
 
-function: type identifier functionparameters scoped_statements	{insert(table, strdup($2), FUNCTION);}
+function: type identifier functionparameters scoped_statements	{insert(table, strdup($2), FUNCTION * $1, scope, value); set_scope($2);}
 		;
 
 functionparameters: PUN_BO typed_parameterlist PUN_BC
