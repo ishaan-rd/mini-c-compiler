@@ -45,14 +45,12 @@
 
 	int type_get(char * id)
 	{
-		return 1;
-		// return return_type(table, id);
+		return return_type(table, id);
 	}
 
 	int type_get_fc(char * id)
 	{
-		return 1;
-		// return return_type(table, id) / FUNCTION;
+		return return_type(table, id) / FUNCTION;
 	}
 
 	void check_type(char * id, int tp)
@@ -65,10 +63,10 @@
 
 	void check_both_type(int tp1, int tp2)
 	{
-		// if( tp1!=tp2 )
-		// {
-		// 	yyerror("invalid type variable\n"); 
-		// }
+		if( tp1!=tp2 )
+		{
+			yyerror("invalid type variable\n"); 
+		}
 	}
 
 %}
