@@ -4,7 +4,8 @@
 	void yyerror(char *);
 
 	symtable ** table = NULL;
-	symtable ** stable = NULL;
+
+	defn_table * DT = NULL;
 
 	int current_dt;
 	int scope = 0;
@@ -150,9 +151,11 @@
 %%
 
 program: gl_declaration			{/*set_scope("EXT");*/}
-		| function				{/*set_scope("EXT");*/}		
+		| function				{/*set_scope("EXT");*/}	
+		| function_definition	
 		| program gl_declaration{/*set_scope("EXT");*/}
 		| program function		{/*set_scope("EXT");*/}
+		| program function_definition
 		;
 
 gl_declaration: type gl_delarationlist SEMICOLON
@@ -230,6 +233,20 @@ untyped_parameterlist: identifier
 		| untyped_parameterlist PUN_COM CONSTANT_CHAR
 		| untyped_parameterlist PUN_COM CONSTANT_STR
 		| untyped_parameterlist PUN_COM point_exp
+		;
+
+function_definition: type identifier function_defn_parameters SEMICOLON	{ DT = add_to_defn(DT, $2, parameter_list); printf("\n\n%d\n\n",DT == NULL); parameter_list = NULL;}
+		;
+
+function_defn_parameters: functionparameters
+		|typeparalist
+		;
+
+typeparalist: PUN_BO type_list PUN_BC
+		;
+
+type_list: type									{parameter_list = add_parameter(parameter_list, "P", $1);}
+		| type_list PUN_COM type				{parameter_list = add_parameter(parameter_list, "P", $3);}
 		;
 
 function_start: type identifier functionparameters {scope = max(max_scope, scope) + 1; insert(table, strdup($2), FUNCTION * $1, -1); parameter_to_symtable(table, parameter_list, scope + 1); parameter_list = NULL;} 
@@ -321,6 +338,8 @@ int main (int argc, char * argv[]) {
 	int x = yyparse();
 
 	display(table);
+
+	// display_dt(DT);
 
 	fclose(yyin);
 }

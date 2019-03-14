@@ -41,7 +41,7 @@ int is_not_present(symtable **table, char *token_name, int scope)
 	symtable *ptr = table[h];
 	while (ptr != NULL)
 	{
-		if (strcmp(ptr->token_name, token_name) == 0 && ptr->scope == scope)
+		if (strcmp(ptr->token_name, token_name) == 0 && (ptr->scope == scope || ptr->token_type % FUNCTION == 0))
 			break;
 		ptr = ptr->pred;
 	}
@@ -58,7 +58,7 @@ int is_present(symtable **table, char *token_name, int scope)
 	symtable *ptr = table[h];
 	while (ptr != NULL)
 	{
-		if (strcmp(ptr->token_name, token_name) == 0 && ptr->scope == scope)
+		if (strcmp(ptr->token_name, token_name) == 0 && (ptr->scope == scope || ptr->token_type % FUNCTION == 0))
 			break;
 		ptr = ptr->pred;
 	}
@@ -164,6 +164,16 @@ void display(symtable **table)
 	printf("_________________________________________________________\n");
 }
 
+void display_dt(defn_table *table)
+{
+	defn_table *itr = table;
+	while (itr != NULL)
+	{
+		printf("|\t%s\t\t|\t%d\t|\n", itr->fn_name, itr->count);
+		itr = itr->next;
+	}
+}
+
 parameter * create_parameter(char *id, int type)
 {
 	parameter * temp = (parameter *)malloc(sizeof(parameter));
@@ -197,3 +207,39 @@ void parameter_to_symtable(symtable ** table, parameter *parameter_list, int sco
 		parameter_list = parameter_list->next;
 	}
 }
+
+defn_table *create_defn(char *token_name, parameter *parameter_list)
+{
+	defn_table *entry = (defn_table *)malloc(sizeof(defn_table));
+
+	int i = 0;
+	while(parameter_list != NULL)
+	{
+		entry->types[i] = parameter_list->type;
+		i++;
+		parameter_list = parameter_list->next;
+	}
+	entry->fn_name = (char *)malloc(sizeof(token_name) + 1);
+	strcpy(entry->fn_name, token_name);
+	entry->count = i;
+	entry->next = NULL;
+	return entry;
+}
+
+defn_table * add_to_defn(defn_table * table, char * function_name, parameter *parameter_list)
+{
+	defn_table * entry = create_defn(function_name, parameter_list);
+	if(table == NULL)
+	{
+		table = entry;
+	}
+	else
+	{
+		defn_table * temp = table;
+		while(temp->next!=NULL){
+			temp = temp->next;
+		}
+		temp->next = entry;
+	}
+	return table;
+};
