@@ -113,7 +113,7 @@ int addIfNotPresent(symtable **table, char *token_name, int token_type, int scop
 {
 	int h = is_not_present(table, token_name, scope);
 
-	if(h!=-1)
+	if (h != -1)
 		if (table[h] == NULL)
 			table[h] = create_entry(token_name, token_type, scope);
 		else
@@ -132,7 +132,7 @@ int return_type(symtable **table, char *token_name, int scope)
 	int h = is_present(table, token_name, scope);
 	symtable *ptr = table[h];
 
-	if(h == -1)
+	if (h == -1)
 		return -1;
 
 	while (ptr != NULL)
@@ -174,37 +174,37 @@ void display_dt(defn_table *table)
 	}
 }
 
-parameter * create_parameter(char *id, int type)
+parameter *create_parameter(char *id, int type)
 {
-	parameter * temp = (parameter *)malloc(sizeof(parameter));
-	temp->id = (char *)malloc(sizeof(char)*(strlen(id)+1));
+	parameter *temp = (parameter *)malloc(sizeof(parameter));
+	temp->id = (char *)malloc(sizeof(char) * (strlen(id) + 1));
 	strcpy(temp->id, id);
 	temp->type = type;
 	temp->next = NULL;
 	return temp;
 }
 
-parameter * add_parameter(parameter *parameter_list, char *id, int type)
+parameter *add_parameter(parameter *parameter_list, char *id, int type)
 {
-	if(parameter_list == NULL)
+	if (parameter_list == NULL)
 		return create_parameter(id, type);
-	
-	parameter * temp = parameter_list;
-	
-	while(temp->next != NULL)
+
+	parameter *temp = parameter_list;
+
+	while (temp->next != NULL)
 		temp = temp->next;
-	
+
 	temp->next = create_parameter(id, type);
 
 	return parameter_list;
 }
 
-void parameter_to_symtable(symtable ** table, parameter *parameter_list, int scope)
+void parameter_to_symtable(symtable **table, parameter *parameter_list, int scope)
 {
-	while(parameter_list != NULL)
+	while (parameter_list != NULL)
 	{
-		if(is_present(table, parameter_list->id, scope) != -1)
-		{	
+		if (is_present(table, parameter_list->id, scope) != -1)
+		{
 			fprintf(stderr, "Redeclared parameter variable.%s already exists. \n\n", parameter_list->id);
 		}
 		insert(table, parameter_list->id, parameter_list->type, scope);
@@ -217,7 +217,7 @@ defn_table *create_defn(char *token_name, parameter *parameter_list)
 	defn_table *entry = (defn_table *)malloc(sizeof(defn_table));
 
 	int i = 0;
-	while(parameter_list != NULL)
+	while (parameter_list != NULL)
 	{
 		entry->types[i] = parameter_list->type;
 		i++;
@@ -230,17 +230,18 @@ defn_table *create_defn(char *token_name, parameter *parameter_list)
 	return entry;
 }
 
-defn_table * add_to_defn(defn_table * table, char * function_name, parameter *parameter_list)
+defn_table *add_to_defn(defn_table *table, char *function_name, parameter *parameter_list)
 {
-	defn_table * entry = create_defn(function_name, parameter_list);
-	if(table == NULL)
+	defn_table *entry = create_defn(function_name, parameter_list);
+	if (table == NULL)
 	{
 		table = entry;
 	}
 	else
 	{
-		defn_table * temp = table;
-		while(temp->next!=NULL){
+		defn_table *temp = table;
+		while (temp->next != NULL)
+		{
 			temp = temp->next;
 		}
 		temp->next = entry;
