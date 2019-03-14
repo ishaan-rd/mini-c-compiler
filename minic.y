@@ -206,7 +206,7 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type(
 		| identifier OP_ASS CONSTANT_CHAR					{id_present($1); check_type($1, CH);}
 		| identifier OP_ASS function_call					{id_present($1); check_type($1, $3);}
 		| identifier OP_ASS OP_ADR identifier				{id_present($1); id_present($4); int x =  type_get($4); check_type($1, x * x);}
-		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { id_present($1); id_present($3); if($5 < 0){yyerror("Array index less than 0");} int x = type_get($1); printf("Chutiya\n"); check_type($3, x * x);}
+		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { id_present($1); id_present($3); if($5 < 0){yyerror("Array index less than 0");} int x = type_get($1); check_type($3, x * x);}
 		| identifier OP_ASS point_exp						{id_present($1); check_type($1, $3);}
 		| identifier OP_INC									{id_present($1); check_type($1, I);}
 		| identifier OP_DEC									{id_present($1); ($1, I);}
