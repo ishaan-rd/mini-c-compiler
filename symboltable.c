@@ -41,7 +41,6 @@ int is_not_present(symtable **table, char *token_name, int scope)
 	symtable *ptr = table[h];
 	while (ptr != NULL)
 	{
-		printf("%s\n", ptr->token_name);
 		if (strcmp(ptr->token_name, token_name) == 0 && ptr->scope == scope)
 			break;
 		ptr = ptr->pred;
@@ -92,8 +91,7 @@ int insert(symtable **table, char *token_name, int token_type, int scope)
 
 	if (h == -1)
 	{
-		printf("\n%s already exists. ", token_name);
-		fprintf(stderr, "Redeclared variable\n\n");
+		fprintf(stderr, "Redeclared variable.%s already exists. \n\n", token_name);
 		return 1;
 	}
 
@@ -159,7 +157,7 @@ void display(symtable **table)
 		symtable *itr = table[i];
 		while (itr != NULL)
 		{
-			printf("|\t%s\t\t|\t%d\t|\t%d\t|\n", table[i]->token_name, table[i]->token_type, table[i]->scope);
+			printf("|\t%s\t\t|\t%d\t|\t%d\t|\n", itr->token_name, itr->token_type, itr->scope);
 			itr = itr->pred;
 		}
 	}

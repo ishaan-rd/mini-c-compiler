@@ -2,6 +2,7 @@
 
 int fun(char aohs){
    int ah = 0;
+   int a = 0;
    return 0;
 }
 
@@ -12,8 +13,10 @@ int main(){
    int a;
    int x = 100 *10 - 20 + 100 %200;
    
-   if(a==9)  {
-      int c=9;/* code */
+   int c = 10;
+
+   if(a==9){
+      int c;/* code */
    }
    
    //2+2=4;

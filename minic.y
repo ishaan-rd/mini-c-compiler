@@ -8,6 +8,7 @@
 
 	int current_dt;
 	int scope = 0;
+	int max_scope = -100;
 	parameter * parameter_list = NULL;
 
 	// void set_scope(char * scp)
@@ -33,6 +34,13 @@
 	// 	value.str_val = (char *)malloc(sizeof(char)*(strlen(val)+1));
 	// 	strcpy(value.str_val, val);
 	// }
+
+	int max(int a, int b)
+	{
+		if(a>b)
+			return a;
+		return b;
+	}
 
 	void id_present(char * id)
 	{
@@ -224,18 +232,24 @@ untyped_parameterlist: identifier
 		| untyped_parameterlist PUN_COM point_exp
 		;
 
-function: type identifier functionparameters scoped_statements	{insert(table, strdup($2), FUNCTION * $1, -1); /*parameter_to_symtable(table, parameter_list); parameter_list = NULL;*/}
+function_start: type identifier functionparameters {scope = max(max_scope, scope) + 1; insert(table, strdup($2), FUNCTION * $1, -1); parameter_to_symtable(table, parameter_list, scope + 1); parameter_list = NULL;} 
+		;
+
+function: function_start scoped_statements
 		;
 
 functionparameters: PUN_BO typed_parameterlist PUN_BC
 		|PUN_BO PUN_BC
 		;
 
-typed_parameterlist: type identifier							{/*parameter_list = add_parameter(parameter_list, $2, $1);*/}
-		| typed_parameterlist PUN_COM type identifier			{/*parameter_list = add_parameter(parameter_list, $4, $3);*/}
+typed_parameterlist: type identifier							{parameter_list = add_parameter(parameter_list, $2, $1);}
+		| typed_parameterlist PUN_COM type identifier			{parameter_list = add_parameter(parameter_list, $4, $3);}
 		;
 
-scoped_statements: PUN_FO statements PUN_FC						{scope++;}
+scoped_statements: scoped_statements_start statements PUN_FC	{--scope;}
+		;
+
+scoped_statements_start: PUN_FO									{++scope; if(scope > max_scope) max_scope = scope;}
 		;
 
 statements: statement
@@ -273,7 +287,7 @@ declare: identifier								{ insert(table, $1, current_dt, scope); }
 		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, scope); int x = type_get($4); check_both_type(current_dt, x*x);}
 		;
 
-scoped_unscoped_statements: scoped_statements
+scoped_unscoped_statements: scoped_statements	{}
 		| statement
 		;
 
