@@ -5,6 +5,8 @@ int fun(char aohs){
    return 0;
 }
 
+// int z = 0;
+
 int main(){
    int * y;
    int a;
