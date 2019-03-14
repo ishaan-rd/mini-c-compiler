@@ -251,10 +251,10 @@ type_list: type									{parameter_list = add_parameter(parameter_list, "P", $1)
 		| type_list PUN_COM type				{parameter_list = add_parameter(parameter_list, "P", $3);}
 		;
 
-function_start: type identifier functionparameters 	{scope = max(max_scope, scope) + 1; insert(table, strdup($2), FUNCTION * $1, -1); parameter_to_symtable(table, parameter_list, scope + 1); parameter_list = NULL; $$ = $1; printf("%d\n", $1);} 
+function_start: type identifier functionparameters 	{scope = max(max_scope, scope) + 1; insert(table, strdup($2), FUNCTION * current_dt, -1); parameter_to_symtable(table, parameter_list, scope + 1); parameter_list = NULL; $$ = current_dt; printf("%d\n", $1);} 
 		;
 
-function: function_start scoped_statements			{if((is_function_over == 0 && $1 == ret_type) || (is_function_over == 1 && $1 == VO)){yyerror("INVAID RETURN TYPE");} is_function_over = 1;}
+function: function_start scoped_statements			{if((is_function_over == 0 && $1 != ret_type) || (is_function_over == 1 && $1 != VO)){yyerror("INVAID RETURN TYPE");} is_function_over = 1;}
 		;
 
 functionparameters: PUN_BO typed_parameterlist PUN_BC

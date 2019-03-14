@@ -4,7 +4,7 @@ int dasdjsak(int , char);
 
 char* fun(char aohs){
    int ah = 0;
-   char* a;
+   char * a;
    return a;
 }
 
