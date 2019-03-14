@@ -141,13 +141,13 @@
 
 %%
 
-program: declaration			{/*set_scope("EXT");*/}
+program: gl_declaration			{/*set_scope("EXT");*/}
 		| function				{/*set_scope("EXT");*/}		
-		| program declaration	{/*set_scope("EXT");*/}
+		| program gl_declaration{/*set_scope("EXT");*/}
 		| program function		{/*set_scope("EXT");*/}
 		;
 
-declaration: type delarationlist SEMICOLON
+gl_declaration: type gl_delarationlist SEMICOLON
 		;
 
 type:	INT 					{$$ = I; current_dt = I;}
@@ -156,16 +156,16 @@ type:	INT 					{$$ = I; current_dt = I;}
 		| type OP_MUL			{$$ = current_dt; current_dt =  $1 * $1;}
 		;
 
-delarationlist:
-		| declare
-		| delarationlist PUN_COM declare
+gl_delarationlist:
+		| gl_declare
+		| gl_delarationlist PUN_COM declare
 		;
 
-declare: identifier								{ insert(table, $1, current_dt, scope); }
-		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, scope); if($3 <= 0){yyerror("Array size less than 1");}}
-		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3);}
-		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, I);}
-		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, scope); int x = type_get($4); check_both_type(current_dt, x*x);}
+gl_declare: identifier								{ insert(table, $1, current_dt, -1); }
+		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, -1); if($3 <= 0){yyerror("Array size less than 1");}}
+		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, $3);}
+		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, I);}
+		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, -1); int x = type_get($4); check_both_type(current_dt, x*x);}
 		;
 
 exp:	arithmetic_exp
@@ -224,7 +224,7 @@ untyped_parameterlist: identifier
 		| untyped_parameterlist PUN_COM point_exp
 		;
 
-function: type identifier functionparameters scoped_statements	{insert(table, strdup($2), FUNCTION * $1, scope); /*parameter_to_symtable(table, parameter_list); parameter_list = NULL;*/}
+function: type identifier functionparameters scoped_statements	{insert(table, strdup($2), FUNCTION * $1, -1); /*parameter_to_symtable(table, parameter_list); parameter_list = NULL;*/}
 		;
 
 functionparameters: PUN_BO typed_parameterlist PUN_BC
@@ -256,6 +256,21 @@ statement: if
 		| function_call SEMICOLON
 		| declaration
 		| assignment_list SEMICOLON
+		;
+
+declaration: type delarationlist SEMICOLON
+		;
+
+delarationlist:
+		| declare
+		| delarationlist PUN_COM declare
+		;
+
+declare: identifier								{ insert(table, $1, current_dt, scope); }
+		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, scope); if($3 <= 0){yyerror("Array size less than 1");}}
+		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3);}
+		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, I);}
+		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, scope); int x = type_get($4); check_both_type(current_dt, x*x);}
 		;
 
 scoped_unscoped_statements: scoped_statements
