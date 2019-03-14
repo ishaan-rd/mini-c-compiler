@@ -39,20 +39,20 @@ typedef struct sym_t
 
 symtable **init();
 
-int insert(symtable **table, char *token_name, int token_type, char *scope);
+int insert(symtable **table, char *token_name, int token_type);
 
-int addIfNotPresent(symtable **table, char *token_name, int token_type, char *scope);
+int addIfNotPresent(symtable **table, char *token_name, int token_type);
 
-int return_type(symtable **table, char *token_name, char *scope);
+int return_type(symtable **table, char *token_name);
 
 int yylex();
 
-int is_present(symtable **table, char *token_name, char *scope);
+int is_present(symtable **table, char *token_name);
 
 void display(symtable **table);
 
 parameter * add_parameter(parameter *parameter_list, char *id, int type);
 
-void parameter_to_symtable(symtable ** table, parameter *parameter_list, char *scope);
+void parameter_to_symtable(symtable ** table, parameter *parameter_list);
 
 #endif

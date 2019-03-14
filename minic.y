@@ -16,7 +16,7 @@
 		strcpy(scope, scp);
 	}
 
-	// val value;
+	val value;
 
 	// void set_int(int val)
 	// {
@@ -36,7 +36,7 @@
 
 	void id_present(char * id)
 	{
- 		if(is_present(table, id, scope)!=-1)
+ 		if(is_present(table, id)==-1)
 		{ 
 			printf("\n%s does not exist\n", id); 
 			yyerror("Undeclared variable\n"); 
@@ -45,17 +45,19 @@
 
 	int type_get(char * id)
 	{
-		return return_type(table, id, scope);
+		return 1;
+		// return return_type(table, id);
 	}
 
 	int type_get_fc(char * id)
 	{
-		return return_type(table, id, "EXT") / FUNCTION;
+		return 1;
+		// return return_type(table, id) / FUNCTION;
 	}
 
 	void check_type(char * id, int tp)
-	{
-		if( tp!=return_type(table, id, scope) )
+	{	
+		if( tp!=return_type(table, id) )
 		{
 			yyerror("invalid type variable\n"); 
 		}
@@ -63,10 +65,10 @@
 
 	void check_both_type(int tp1, int tp2)
 	{
-		if( tp1!=tp2 )
-		{
-			yyerror("invalid type variable\n"); 
-		}
+		// if( tp1!=tp2 )
+		// {
+		// 	yyerror("invalid type variable\n"); 
+		// }
 	}
 
 %}
@@ -161,11 +163,11 @@ delarationlist:
 		| delarationlist PUN_COM declare
 		;
 
-declare: identifier								{ insert(table, $1, current_dt, scope); }
-		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, scope); if($3 <= 0){yyerror("Array size less than 1");}}
-		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3);}
-		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, I);}
-		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, scope); int x = type_get($4); check_both_type(current_dt, x*x);}
+declare: identifier								{ insert(table, $1, current_dt); }
+		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt); if($3 <= 0){yyerror("Array size less than 1");}}
+		| identifier OP_ASS function_call		{ insert(table, $1, current_dt); check_both_type(current_dt, $3);}
+		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt); check_both_type(current_dt, I);}
+		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt); int x = type_get($4); check_both_type(current_dt, x*x);}
 		;
 
 exp:	arithmetic_exp
@@ -195,10 +197,10 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type(
 		| identifier OP_ASS CONSTANT_CHAR					{id_present($1); check_type($1, CH);}
 		| identifier OP_ASS function_call					{id_present($1); check_type($1, $3);}
 		| identifier OP_ASS OP_ADR identifier				{id_present($1); id_present($4); int x =  type_get($4); check_type($1, x * x);}
-		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { id_present($1); id_present($3); if($5 < 0){yyerror("Array index less than 0");} int x = type_get($1); check_type($3, x * x);}
+		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { id_present($1); id_present($3); if($5 < 0){yyerror("Array index less than 0");} int x = type_get($1); printf("Chutiya\n"); check_type($3, x * x);}
 		| identifier OP_ASS point_exp						{id_present($1); check_type($1, $3);}
 		| identifier OP_INC									{id_present($1); check_type($1, I);}
-		| identifier OP_DEC									{id_present($1); check_type($1, I);}
+		| identifier OP_DEC									{id_present($1); ($1, I);}
 		;
 
 point_exp: OP_MUL identifier								{$$ = type_get($2) * type_get($2);}
@@ -224,15 +226,15 @@ untyped_parameterlist: identifier
 		| untyped_parameterlist PUN_COM point_exp
 		;
 
-function: type identifier functionparameters scoped_statements	{insert(table, strdup($2), FUNCTION * $1, scope); set_scope($2); parameter_to_symtable(table, parameter_list, scope); parameter_list = NULL;}
+function: type identifier functionparameters scoped_statements	{insert(table, strdup($2), FUNCTION * $1); set_scope($2); /*parameter_to_symtable(table, parameter_list); parameter_list = NULL;*/}
 		;
 
 functionparameters: PUN_BO typed_parameterlist PUN_BC
 		|PUN_BO PUN_BC
 		;
 
-typed_parameterlist: type identifier							{parameter_list = add_parameter(parameter_list, $2, $1);}
-		| typed_parameterlist PUN_COM type identifier			{parameter_list = add_parameter(parameter_list, $4, $3);}
+typed_parameterlist: type identifier							{/*parameter_list = add_parameter(parameter_list, $2, $1);*/}
+		| typed_parameterlist PUN_COM type identifier			{/*parameter_list = add_parameter(parameter_list, $4, $3);*/}
 		;
 
 scoped_statements: PUN_FO statements PUN_FC
