@@ -235,7 +235,7 @@ untyped_parameterlist: identifier
 		| untyped_parameterlist PUN_COM point_exp
 		;
 
-function_definition: type identifier function_defn_parameters SEMICOLON	{ DT = add_to_defn(DT, $2, parameter_list); printf("\n\n%d\n\n",DT == NULL); parameter_list = NULL;}
+function_definition: type identifier function_defn_parameters SEMICOLON	{ DT = add_to_defn(DT, $2, parameter_list); parameter_list = NULL;}
 		;
 
 function_defn_parameters: functionparameters

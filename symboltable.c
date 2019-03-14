@@ -203,7 +203,11 @@ void parameter_to_symtable(symtable ** table, parameter *parameter_list, int sco
 {
 	while(parameter_list != NULL)
 	{
-		addIfNotPresent(table, parameter_list->id, parameter_list->type, scope);
+		if(is_present(table, parameter_list->id, scope) != -1)
+		{	
+			fprintf(stderr, "Redeclared parameter variable.%s already exists. \n\n", parameter_list->id);
+		}
+		insert(table, parameter_list->id, parameter_list->type, scope);
 		parameter_list = parameter_list->next;
 	}
 }
