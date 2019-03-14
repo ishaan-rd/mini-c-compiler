@@ -10,6 +10,8 @@
 	int current_dt;
 	int scope = 0;
 	int max_scope = -100;
+	int ret_type = -100;
+	int is_function_over = 1;
 	parameter * parameter_list = NULL;
 
 	// void set_scope(char * scp)
@@ -125,7 +127,7 @@
 
 %type <token_name> identifier
 
-%type <int_val> type arithmetic_exp function_call point_exp
+%type <int_val> type arithmetic_exp function_call point_exp function_start
 
 %left PUN_COM
 %left OP_OR OP_AND
@@ -206,7 +208,7 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type(
 		| identifier OP_ASS CONSTANT_CHAR					{id_present($1); check_type($1, CH);}
 		| identifier OP_ASS function_call					{id_present($1); check_type($1, $3);}
 		| identifier OP_ASS OP_ADR identifier				{id_present($1); id_present($4); int x =  type_get($4); check_type($1, x * x);}
-		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { id_present($1); id_present($3); if($5 < 0){yyerror("Array index less than 0");} int x = type_get($1); printf("Chutiya\n"); check_type($3, x * x);}
+		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { id_present($1); id_present($3); if($5 < 0){yyerror("Array index less than 0");} int x = type_get($1); check_type($3, x * x);}
 		| identifier OP_ASS point_exp						{id_present($1); check_type($1, $3);}
 		| identifier OP_INC									{id_present($1); check_type($1, I);}
 		| identifier OP_DEC									{id_present($1); ($1, I);}
@@ -249,10 +251,10 @@ type_list: type									{parameter_list = add_parameter(parameter_list, "P", $1)
 		| type_list PUN_COM type				{parameter_list = add_parameter(parameter_list, "P", $3);}
 		;
 
-function_start: type identifier functionparameters {scope = max(max_scope, scope) + 1; insert(table, strdup($2), FUNCTION * $1, -1); parameter_to_symtable(table, parameter_list, scope + 1); parameter_list = NULL;} 
+function_start: type identifier functionparameters 	{scope = max(max_scope, scope) + 1; insert(table, strdup($2), FUNCTION * $1, -1); parameter_to_symtable(table, parameter_list, scope + 1); parameter_list = NULL; $$ = $1; printf("%d\n", $1);} 
 		;
 
-function: function_start scoped_statements
+function: function_start scoped_statements			{if((is_function_over == 0 && $1 == ret_type) || (is_function_over == 1 && $1 == VO)){yyerror("INVAID RETURN TYPE");} is_function_over = 1;}
 		;
 
 functionparameters: PUN_BO typed_parameterlist PUN_BC
@@ -280,8 +282,9 @@ assignment_list: assignment_exp
 statement: if
 		| for
 		| while
-		| RETURN SEMICOLON
-		| RETURN exp SEMICOLON
+		| RETURN SEMICOLON							{if(is_function_over == 1){is_function_over = 0; ret_type = VO;} else if(ret_type != VO){ yyerror("INVALID RETURN TYPE");}}
+		| RETURN identifier SEMICOLON				{if(is_function_over == 1){is_function_over = 0; ret_type = type_get($2);} else if(ret_type != type_get($2)){ yyerror("INVALID RETURN TYPE");}}
+		| RETURN CONSTANT_INT SEMICOLON				{if(is_function_over == 1){is_function_over = 0; ret_type = I;} else if(ret_type != I){ yyerror("INVALID RETURN TYPE");}}
 		| CONTINUE SEMICOLON
 		| BREAK SEMICOLON
 		| function_call SEMICOLON
