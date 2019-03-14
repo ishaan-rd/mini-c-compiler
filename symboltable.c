@@ -76,6 +76,7 @@ symtable *create_entry(char *token_name, int token_type, int scope)
 	entry->token_name = (char *)malloc(sizeof(token_name) + 1);
 	strcpy(entry->token_name, token_name);
 	entry->scope = scope;
+	entry->funs = NULL;
 	// strcpy(entry->scope);
 	// entry->value = value;
 	entry->token_type = token_type;
@@ -100,6 +101,36 @@ int insert(symtable **table, char *token_name, int token_type, int scope)
 	else
 	{
 		symtable *entry = create_entry(token_name, token_type, scope);
+		symtable *ptr = table[h];
+		entry->pred = ptr;
+		table[h] = entry;
+	}
+
+	return 0;
+}
+
+int insert_func(symtable **table, char *token_name, int token_type, int scope, int i, parameter * parameter_list)
+{
+	int h = is_not_present(table, token_name, scope);
+	symtable *entry = create_entry(token_name, token_type, scope);
+
+	if (h == -1)
+	{
+		fprintf(stderr, "Redeclared variable.%s already exists. \n\n", token_name);
+		return 1;
+	}
+	int j = 0;
+	int * A = (int *)malloc(sizeof(int) * i);
+
+	while(parameter_list != NULL){
+		A[j] = parameter_list->type;
+		parameter_list = parameter_list->next;
+	}
+	
+	if (table[h] == NULL)
+		table[h] = entry;
+	else
+	{
 		symtable *ptr = table[h];
 		entry->pred = ptr;
 		table[h] = entry;
@@ -199,8 +230,9 @@ parameter *add_parameter(parameter *parameter_list, char *id, int type)
 	return parameter_list;
 }
 
-void parameter_to_symtable(symtable **table, parameter *parameter_list, int scope)
+int parameter_to_symtable(symtable **table, parameter *parameter_list, int scope)
 {
+	int i = 0;
 	while (parameter_list != NULL)
 	{
 		if (is_present(table, parameter_list->id, scope) != -1)
@@ -209,7 +241,9 @@ void parameter_to_symtable(symtable **table, parameter *parameter_list, int scop
 		}
 		insert(table, parameter_list->id, parameter_list->type, scope);
 		parameter_list = parameter_list->next;
+		i++;
 	}
+	return i;
 }
 
 defn_table *create_defn(char *token_name, parameter *parameter_list)
