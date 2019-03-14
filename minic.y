@@ -7,14 +7,14 @@
 	symtable ** stable = NULL;
 
 	int current_dt;
-	char * scope;
+	int scope = 0;
 	parameter * parameter_list = NULL;
 
-	void set_scope(char * scp)
-	{
-		scope = (char *)malloc(sizeof(char)*(strlen(scp)+1));
-		strcpy(scope, scp);
-	}
+	// void set_scope(char * scp)
+	// {
+	// 	scope = (char *)malloc(sizeof(char)*(strlen(scp)+1));
+	// 	strcpy(scope, scp);
+	// }
 
 	val value;
 
@@ -36,28 +36,28 @@
 
 	void id_present(char * id)
 	{
- 		if(is_present(table, id)==-1)
+ 		if(is_present(table, id, scope)==-1)
 		{ 
 			printf("\n%s does not exist\n", id); 
 			yyerror("Undeclared variable\n"); 
-		} 
+		}
 	}
 
 	int type_get(char * id)
 	{
-		return return_type(table, id);
+		return return_type(table, id, scope);
 	}
 
 	int type_get_fc(char * id)
 	{
-		return return_type(table, id) / FUNCTION;
+		return return_type(table, id, scope) / FUNCTION;
 	}
 
 	void check_type(char * id, int tp)
 	{	
-		if( tp!=return_type(table, id) )
+		if( tp!=return_type(table, id, scope) )
 		{
-			yyerror("invalid type variable\n"); 
+			yyerror("invalid type variable\n");
 		}
 	}
 
@@ -141,10 +141,10 @@
 
 %%
 
-program: declaration			{set_scope("EXT");}
-		| function				{set_scope("EXT");}		
-		| program declaration	{set_scope("EXT");}
-		| program function		{set_scope("EXT");}
+program: declaration			{/*set_scope("EXT");*/}
+		| function				{/*set_scope("EXT");*/}		
+		| program declaration	{/*set_scope("EXT");*/}
+		| program function		{/*set_scope("EXT");*/}
 		;
 
 declaration: type delarationlist SEMICOLON
@@ -161,11 +161,11 @@ delarationlist:
 		| delarationlist PUN_COM declare
 		;
 
-declare: identifier								{ insert(table, $1, current_dt); }
-		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt); if($3 <= 0){yyerror("Array size less than 1");}}
-		| identifier OP_ASS function_call		{ insert(table, $1, current_dt); check_both_type(current_dt, $3);}
-		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt); check_both_type(current_dt, I);}
-		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt); int x = type_get($4); check_both_type(current_dt, x*x);}
+declare: identifier								{ insert(table, $1, current_dt, scope); }
+		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, scope); if($3 <= 0){yyerror("Array size less than 1");}}
+		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3);}
+		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, I);}
+		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, scope); int x = type_get($4); check_both_type(current_dt, x*x);}
 		;
 
 exp:	arithmetic_exp
@@ -224,7 +224,7 @@ untyped_parameterlist: identifier
 		| untyped_parameterlist PUN_COM point_exp
 		;
 
-function: type identifier functionparameters scoped_statements	{insert(table, strdup($2), FUNCTION * $1); set_scope($2); /*parameter_to_symtable(table, parameter_list); parameter_list = NULL;*/}
+function: type identifier functionparameters scoped_statements	{insert(table, strdup($2), FUNCTION * $1, scope); /*parameter_to_symtable(table, parameter_list); parameter_list = NULL;*/}
 		;
 
 functionparameters: PUN_BO typed_parameterlist PUN_BC
@@ -235,7 +235,7 @@ typed_parameterlist: type identifier							{/*parameter_list = add_parameter(par
 		| typed_parameterlist PUN_COM type identifier			{/*parameter_list = add_parameter(parameter_list, $4, $3);*/}
 		;
 
-scoped_statements: PUN_FO statements PUN_FC
+scoped_statements: PUN_FO statements PUN_FC						{scope++;}
 		;
 
 statements: statement

@@ -35,14 +35,14 @@ int hash(char *token_name)
 		return -h;
 }
 
-int is_not_present(symtable **table, char *token_name)
+int is_not_present(symtable **table, char *token_name, int scope)
 {
 	int h = hash(token_name);
 	symtable *ptr = table[h];
 	while (ptr != NULL)
 	{
 		printf("%s\n", ptr->token_name);
-		if (strcmp(ptr->token_name, token_name) == 0)
+		if (strcmp(ptr->token_name, token_name) == 0 && ptr->scope == scope)
 			break;
 		ptr = ptr->pred;
 	}
@@ -53,13 +53,13 @@ int is_not_present(symtable **table, char *token_name)
 		return -1;
 }
 
-int is_present(symtable **table, char *token_name)
+int is_present(symtable **table, char *token_name, int scope)
 {
 	int h = hash(token_name);
 	symtable *ptr = table[h];
 	while (ptr != NULL)
 	{
-		if (strcmp(ptr->token_name, token_name) == 0)
+		if (strcmp(ptr->token_name, token_name) == 0 && ptr->scope == scope)
 			break;
 		ptr = ptr->pred;
 	}
@@ -71,12 +71,12 @@ int is_present(symtable **table, char *token_name)
 }
 
 // symtable *create_entry(char *token_name, int token_type, val value)
-symtable *create_entry(char *token_name, int token_type)
+symtable *create_entry(char *token_name, int token_type, int scope)
 {
 	symtable *entry = (symtable *)malloc(sizeof(symtable));
 	entry->token_name = (char *)malloc(sizeof(token_name) + 1);
 	strcpy(entry->token_name, token_name);
-	// entry->scope = (char *)malloc(sizeof(scope) + 1);
+	entry->scope = scope;
 	// strcpy(entry->scope);
 	// entry->value = value;
 	entry->token_type = token_type;
@@ -86,9 +86,9 @@ symtable *create_entry(char *token_name, int token_type)
 
 // Return 0 if no error else return 1
 // int insert(symtable **table, char *token_name, int token_type, val value)
-int insert(symtable **table, char *token_name, int token_type)
+int insert(symtable **table, char *token_name, int token_type, int scope)
 {
-	int h = is_not_present(table, token_name);
+	int h = is_not_present(table, token_name, scope);
 
 	if (h == -1)
 	{
@@ -98,10 +98,10 @@ int insert(symtable **table, char *token_name, int token_type)
 	}
 
 	if (table[h] == NULL)
-		table[h] = create_entry(token_name, token_type);
+		table[h] = create_entry(token_name, token_type, scope);
 	else
 	{
-		symtable *entry = create_entry(token_name, token_type);
+		symtable *entry = create_entry(token_name, token_type, scope);
 		symtable *ptr = table[h];
 		entry->pred = ptr;
 		table[h] = entry;
@@ -111,16 +111,16 @@ int insert(symtable **table, char *token_name, int token_type)
 }
 
 // int addIfNotPresent(symtable **table, char *token_name, int token_type, val value)
-int addIfNotPresent(symtable **table, char *token_name, int token_type)
+int addIfNotPresent(symtable **table, char *token_name, int token_type, int scope)
 {
-	int h = is_not_present(table, token_name);
+	int h = is_not_present(table, token_name, scope);
 
 	if(h!=-1)
 		if (table[h] == NULL)
-			table[h] = create_entry(token_name, token_type);
+			table[h] = create_entry(token_name, token_type, scope);
 		else
 		{
-			symtable *entry = create_entry(token_name, token_type);
+			symtable *entry = create_entry(token_name, token_type, scope);
 			symtable *ptr = table[h];
 			entry->pred = ptr;
 			table[h] = entry;
@@ -129,9 +129,9 @@ int addIfNotPresent(symtable **table, char *token_name, int token_type)
 	return 0;
 }
 
-int return_type(symtable **table, char *token_name)
+int return_type(symtable **table, char *token_name, int scope)
 {
-	int h = is_present(table, token_name);
+	int h = is_present(table, token_name, scope);
 	symtable *ptr = table[h];
 
 	if(h == -1)
@@ -139,7 +139,7 @@ int return_type(symtable **table, char *token_name)
 
 	while (ptr != NULL)
 	{
-		if (strcmp(ptr->token_name, token_name) == 0)
+		if (strcmp(ptr->token_name, token_name) == 0 && ptr->scope == scope)
 		{
 			break;
 		}
@@ -151,19 +151,19 @@ int return_type(symtable **table, char *token_name)
 void display(symtable **table)
 {
 	int i;
-	printf("_________________________________________\n");
-	printf("|\tToken Name\t|\tType\t|\n");
-	printf("_________________________________________\n");
+	printf("_________________________________________________________\n");
+	printf("|\tToken Name\t|\tType\t|\tScope\t|\n");
+	printf("_________________________________________________________\n");
 	for (i = 0; i < HT_SIZE; i++)
 	{
 		symtable *itr = table[i];
 		while (itr != NULL)
 		{
-			printf("|\t%s\t\t|\t%d\t|\n", table[i]->token_name, table[i]->token_type);
+			printf("|\t%s\t\t|\t%d\t|\t%d\t|\n", table[i]->token_name, table[i]->token_type, table[i]->scope);
 			itr = itr->pred;
 		}
 	}
-	printf("_________________________________________\n");
+	printf("_________________________________________________________\n");
 }
 
 parameter * create_parameter(char *id, int type)
@@ -191,10 +191,11 @@ parameter * add_parameter(parameter *parameter_list, char *id, int type)
 	return parameter_list;
 }
 
-void parameter_to_symtable(symtable ** table, parameter *parameter_list)
+void parameter_to_symtable(symtable ** table, parameter *parameter_list, int scope)
 {
 	while(parameter_list != NULL)
 	{
-		addIfNotPresent(table, parameter_list->id, parameter_list->type);
+		addIfNotPresent(table, parameter_list->id, parameter_list->type, scope);
+		parameter_list = parameter_list->next;
 	}
 }

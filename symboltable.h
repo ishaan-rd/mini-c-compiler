@@ -32,27 +32,27 @@ typedef struct sym_t
 {
 	char *token_name;
 	int token_type;
-	char *scope;
+	int scope;
 	val value;
 	struct sym_t *pred;
 } symtable;
 
 symtable **init();
 
-int insert(symtable **table, char *token_name, int token_type);
+int insert(symtable **table, char *token_name, int token_type, int scope);
 
-int addIfNotPresent(symtable **table, char *token_name, int token_type);
+int addIfNotPresent(symtable **table, char *token_name, int token_type, int scope);
 
-int return_type(symtable **table, char *token_name);
+int return_type(symtable **table, char *token_name, int scope);
 
 int yylex();
 
-int is_present(symtable **table, char *token_name);
+int is_present(symtable **table, char *token_name, int scope);
 
 void display(symtable **table);
 
 parameter * add_parameter(parameter *parameter_list, char *id, int type);
 
-void parameter_to_symtable(symtable ** table, parameter *parameter_list);
+void parameter_to_symtable(symtable ** table, parameter *parameter_list, int scope);
 
 #endif
