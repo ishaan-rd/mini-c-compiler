@@ -1,26 +1,15 @@
 #include<stdio.h> 
 
-int dasdjsak(int , char);
-
-char * fun(int x, char * y){
-   int ah = 0;
-   char * t;
-   return t;
+void strcpy(char * c1, char * c2)
+{
+   return;
 }
 
-// int z = 0;
+void main()
+{
 
-int main(){
-   char * y;
-   char x;
-   x = 'x';
-   int a = 0;
-   
-   fun(a, y);
-   // int x = 100 *10 - 20 + 100 %200;
-   
-   // y = &x;
+   int a,b,c;
 
-   //2+2=4;
-   return a;
+   a=b+c;
+
 }
