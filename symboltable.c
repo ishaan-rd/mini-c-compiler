@@ -129,7 +129,8 @@ int insert_func(symtable **table, char *token_name, int token_type, int scope, i
 	}
 
 	entry->nos = j;
-	
+	entry->funs = A;
+
 	if (table[h] == NULL)
 		table[h] = entry;
 	else
@@ -191,6 +192,7 @@ void display(symtable **table)
 		symtable *itr = table[i];
 		while (itr != NULL)
 		{
+			int temp = 0;
 			printf("|\t%s\t\t|\t%d\t|\t%d\t|\n", itr->token_name, itr->token_type, itr->scope);
 			itr = itr->pred;
 		}
@@ -288,31 +290,32 @@ defn_table *add_to_defn(defn_table *table, char *function_name, parameter *param
 
 void check_params(symtable ** table, char * token_name, parameter * parameter_list)
 {
-	// int h = hash(token_name);
-	// symtable *ptr = table[h];
-	// while (ptr != NULL)
-	// {
-	// 	if (strcmp(ptr->token_name, token_name) == 0 && ptr->token_type % FUNCTION == 0)
-	// 		break;
-	// 	ptr = ptr->pred;
-	// }
-	// int i = 0;
-	// while(parameter_list!=NULL || i <= ptr->nos)
-	// {
-	// 	if(ptr->funs[i] == parameter_list->type)
-	// 	{
-	// 		i++;
-	// 		parameter_list = parameter_list->next;
-	// 	}
-	// 	else
-	// 	{
-	// 		i = ptr->nos + 1;
-	// 	}
-	// }
+	int h = hash(token_name);
+	symtable *ptr = table[h];
+	while (ptr != NULL)
+	{
+		if (strcmp(ptr->token_name, token_name) == 0 && ptr->token_type % FUNCTION == 0)
+			break;
+		ptr = ptr->pred;
+	}
+	int i = 0;
 
-	// if(ptr->nos < i || parameter_list == NULL)
-	// {
-	// 	fprintf(stderr, "ERROR FUNCTION CALL\n");
-	// }
-	
+	while(parameter_list!=NULL || i < ptr->nos)
+	{
+		if(ptr->funs[i] == parameter_list->type)
+		{
+			i++;
+			parameter_list = parameter_list->next;
+		}
+		else
+		{
+			i = ptr->nos + 1;
+			break;
+		}
+	}
+
+	if(ptr->nos < i || parameter_list == NULL)
+	{
+		fprintf(stderr, "ERROR FUNCTION CALL\n");
+	}
 }

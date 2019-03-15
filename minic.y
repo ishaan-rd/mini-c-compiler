@@ -61,7 +61,7 @@
 
 	int type_get_fc(char * id)
 	{
-		return return_type(table, id, scope) / FUNCTION;
+		return return_type(table, id, -1) / FUNCTION;
 	}
 
 	void check_type(char * id, int tp)
@@ -218,19 +218,23 @@ point_exp: OP_MUL identifier								{$$ = type_get($2) * type_get($2);}
 		| OP_MUL point_exp									{$$ = $2 * $2;}
 		;
 
-function_call: identifier PUN_BO untyped_parameterlist PUN_BC 	{id_present($1); $$ = type_get_fc($1); /*check_params(table, $1, parameter_list); */parameter_list = NULL;}
+function_call: identifier PUN_BO untyped_parameterlist PUN_BC 	{id_present($1); $$ = type_get_fc($1); check_params(table, $1, parameter_list); parameter_list = NULL;}
 		| identifier PUN_BO PUN_BC							{id_present($1); $$ = type_get_fc($1); check_params(table, $1, parameter_list); parameter_list = NULL;}
 		;
 
 identifier: ID												{$$ = strdup($1);}
 		;
 
-untyped_parameterlist: identifier							
-		| CONSTANT_INT										
-		| point_exp											
-		| untyped_parameterlist PUN_COM identifier			
-		| untyped_parameterlist PUN_COM CONSTANT_INT		
-		| untyped_parameterlist PUN_COM point_exp			
+untyped_parameterlist: identifier							{parameter_list = add_parameter(parameter_list, "P", type_get($1));}
+		| CONSTANT_INT										{parameter_list = add_parameter(parameter_list, "P", I);}
+		| CONSTANT_CHAR										{parameter_list = add_parameter(parameter_list, "P", CH);}
+		| CONSTANT_STR										{parameter_list = add_parameter(parameter_list, "P", CH * CH);}
+		| point_exp											{parameter_list = add_parameter(parameter_list, "P", $1);}
+		| untyped_parameterlist PUN_COM identifier			{parameter_list = add_parameter(parameter_list, "P", type_get($3));}
+		| untyped_parameterlist PUN_COM CONSTANT_INT		{parameter_list = add_parameter(parameter_list, "P", I);}
+		| untyped_parameterlist PUN_COM CONSTANT_CHAR		{parameter_list = add_parameter(parameter_list, "P", CH);}
+		| untyped_parameterlist PUN_COM CONSTANT_STR		{parameter_list = add_parameter(parameter_list, "P", CH * CH);}
+		| untyped_parameterlist PUN_COM point_exp			{parameter_list = add_parameter(parameter_list, "P", $3);}
 		;
 
 function_definition: type identifier function_defn_parameters SEMICOLON	{ DT = add_to_defn(DT, $2, parameter_list); parameter_list = NULL;}
