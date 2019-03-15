@@ -299,8 +299,9 @@ void check_params(symtable ** table, char * token_name, parameter * parameter_li
 		ptr = ptr->pred;
 	}
 	int i = 0;
+	int isError = 0;
 
-	while(parameter_list!=NULL || i < ptr->nos)
+	while(parameter_list!=NULL && i < ptr->nos)
 	{
 		if(ptr->funs[i] == parameter_list->type)
 		{
@@ -309,12 +310,12 @@ void check_params(symtable ** table, char * token_name, parameter * parameter_li
 		}
 		else
 		{
-			i = ptr->nos + 1;
+			isError = 1;
 			break;
 		}
 	}
 
-	if(ptr->nos < i || parameter_list == NULL)
+	if(isError || parameter_list != NULL || i < ptr->nos)
 	{
 		fprintf(stderr, "ERROR FUNCTION CALL\n");
 	}

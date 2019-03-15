@@ -2,7 +2,7 @@
 
 int dasdjsak(int , char);
 
-char * fun(int x){
+char * fun(int x, char * y){
    int ah = 0;
    char * t;
    return t;
@@ -16,7 +16,7 @@ int main(){
    x = 'x';
    int a = 0;
    
-   fun(x);
+   fun(a, y);
    // int x = 100 *10 - 20 + 100 %200;
    
    // y = &x;
