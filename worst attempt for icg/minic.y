@@ -14,6 +14,11 @@
 	int is_function_over = 1;
 	parameter * parameter_list = NULL;
 
+	struct fc {
+		int type;
+		char * name;
+	};
+
 	// void set_scope(char * scp)
 	// {
 	// 	scope = (char *)malloc(sizeof(char)*(strlen(scp)+1));
@@ -80,10 +85,64 @@
 		}
 	}
 
+	int int_val(char * token_name)
+	{
+		return return_int_val(table, token_name, scope);
+	}
+
+	char char_val(char * token_name)
+	{
+		return return_char_val(table, token_name, scope);
+	}
+	
+	char * str_val(char * token_name)
+	{
+		return return_str_val(table, token_name, scope);
+	}
+
+	void * point_val(char * token_name)
+	{
+		return return_point_val(table, token_name, scope);
+	}
+
+	void add_int(char * token_name, int val)
+	{
+		add_int_val(table, token_name, scope, val);
+	}
+
+	void add_char(char * token_name, char val)
+	{
+		add_char_val(table, token_name, scope, val);
+	}
+	
+	void add_str(char * token_name, char * val)
+	{
+		add_str_val(table, token_name, scope, val);
+	}
+
+	void add_ptr(char * token_name, char * token)
+	{
+		add_point_val(table, token_name, scope, token);
+	}
+
+	void create_arr(char * token_name, int offset)
+	{
+		create_int_arr(table, token_name, scope, offset);
+	}
+
+	int return_arr(char * token_name, int offset)
+	{
+		return return_int_arr(table, token_name, scope, offset);
+	}
+
+	void add_arr(char * token_name, int val, int offset)
+	{
+		add_int_arr(table, token_name, scope, val, offset);
+	}
 %}
 
 // Symbol table
-%union {char* token_name; int int_val; char char_val; char * string_val;}
+%union {char* token_name; int int_val; char char_val; char * string_val; struct fc fc_val}
 
 %token SEMICOLON 
 
@@ -127,7 +186,9 @@
 
 %type <token_name> identifier
 
-%type <int_val> type arithmetic_exp function_call point_exp function_start
+%type <int_val> type arithmetic_exp point_exp function_start
+
+%type <fc_val> function_call
 
 %left PUN_COM
 %left OP_OR OP_AND
@@ -175,10 +236,10 @@ gl_delarationlist:
 		;
 
 gl_declare: identifier								{ insert(table, $1, current_dt, -1); }
-		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, -1); if($3 <= 0){yyerror("Array size less than 1");}}
-		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, $3);}
-		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, I);}
-		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, -1); int x = type_get($4); check_both_type(current_dt, x*x);}
+		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, -1); if($3 <= 0){yyerror("Array size less than 1");} create_int_arr(table, $1, -1, $3);}
+		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, $3.type);}
+		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, I); add_int_val(table, $1, -1, $3);}
+		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, -1); int x = type_get($4); check_both_type(current_dt, x*x); add_point_val(table, $1, -1, $4);}
 		;
 
 exp:	arithmetic_exp
@@ -200,26 +261,47 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{ $$ = $1 && $3;}
 		| OP_SUB arithmetic_exp %prec UMINUS				{ $$ = -$2;}
 		| OP_ADD arithmetic_exp %prec UMINUS				{ $$ = +$2;}
 		| PUN_BO arithmetic_exp PUN_BC						{ $$ = ($2);}
-		| identifier										{ $$ = 2; id_present($1); check_type($1, I); }
+		| identifier										{ id_present($1); check_type($1, I); $$ = int_val($1); }
 		| CONSTANT_INT										{ $$ = $1;}
 		;
 
-assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type($1, I);}
-		| identifier OP_ASS CONSTANT_CHAR					{id_present($1); check_type($1, CH);}
-		| identifier OP_ASS function_call					{id_present($1); check_type($1, $3);}
-		| identifier OP_ASS OP_ADR identifier				{id_present($1); id_present($4); int x =  type_get($4); check_type($1, x * x);}
-		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { id_present($1); id_present($3); if($5 < 0){yyerror("Array index less than 0");} int x = type_get($1); check_type($3, x * x);}
+assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type($1, I); add_int($1, $3);}
+		| identifier OP_ASS CONSTANT_CHAR					{id_present($1); check_type($1, CH); add_char($1, $3);}
+		| identifier OP_ASS function_call					{id_present($1); id_present($3.name); check_type($1, $3.type);}
+		| identifier OP_ASS OP_ADR identifier				{id_present($1); 
+															id_present($4);
+															int x =  type_get($4); 
+															check_type($1, x * x);  
+															add_ptr($1, $4);}
+		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { id_present($1); id_present($3); if($5 < 0){yyerror("Array index less than 0");} int x = type_get($1); check_type($3, x * x); add_int($1, return_arr($3, $5));}
 		| identifier OP_ASS point_exp						{id_present($1); check_type($1, $3);}
-		| identifier OP_INC									{id_present($1); check_type($1, I);}
-		| identifier OP_DEC									{id_present($1); ($1, I);}
+		| identifier PUN_SQO arithmetic_exp PUN_SQC OP_ASS arithmetic_exp	{id_present($1); check_type($1, I*I); add_arr($1, $6, $3);}
+		| identifier OP_INC									{id_present($1); check_type($1, I); add_int($1, int_val($1) + 1);}
+		| identifier OP_DEC									{id_present($1); check_type($1, I); add_int($1, int_val($1) - 1);}
 		;
 
 point_exp: OP_MUL identifier								{$$ = type_get($2) * type_get($2);}
 		| OP_MUL point_exp									{$$ = $2 * $2;}
 		;
 
-function_call: identifier PUN_BO untyped_parameterlist PUN_BC 	{id_present($1); $$ = type_get_fc($1); check_params(table, $1, parameter_list); parameter_list = NULL;}
-		| identifier PUN_BO PUN_BC							{id_present($1); $$ = type_get_fc($1); check_params(table, $1, parameter_list); parameter_list = NULL;}
+function_call: identifier PUN_BO untyped_parameterlist PUN_BC 	{
+																id_present($1); 
+																struct fc temp; temp.type = type_get_fc($1); 
+																temp.name = (char *)malloc(sizeof(char) * (strlen($1 + 1)) ); 
+																strcpy(temp.name, $1);
+																check_params(table, $1, parameter_list); 
+																parameter_list = NULL;
+																$$ = temp;
+															}
+		| identifier PUN_BO PUN_BC							{
+															id_present($1); 
+															struct fc temp; temp.type = type_get_fc($1); 
+															temp.name = (char *)malloc(sizeof(char) * (strlen($1 + 1)) ); 
+															strcpy(temp.name, $1);
+															check_params(table, $1, parameter_list); 
+															parameter_list = NULL;
+															$$ = temp;
+															}
 		;
 
 identifier: ID												{$$ = strdup($1);}
@@ -301,10 +383,10 @@ delarationlist:
 		;
 
 declare: identifier								{ insert(table, $1, current_dt, scope); }
-		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, scope); if($3 <= 0){yyerror("Array size less than 1");}}
-		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3);}
-		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, I);}
-		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, scope); int x = type_get($4); check_both_type(current_dt, x*x);}
+		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, scope); if($3 <= 0){yyerror("Array size less than 1");}  create_arr($1, $3);}
+		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3.type);}
+		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, I); add_int($1, $3);}
+		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, scope); int x = type_get($4); check_both_type(current_dt, x*x); add_ptr($1, $4);}
 		;
 
 scoped_unscoped_statements: scoped_statements	{}

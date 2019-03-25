@@ -69,6 +69,23 @@ int is_present(symtable **table, char *token_name, int scope)
 		return h;
 }
 
+symtable * return_location(symtable **table, char *token_name, int scope)
+{
+	int h = hash(token_name);
+	symtable *ptr = table[h];
+	while (ptr != NULL)
+	{
+		if (strcmp(ptr->token_name, token_name) == 0 && (ptr->scope == scope || ptr->token_type % FUNCTION == 0))
+			break;
+		ptr = ptr->pred;
+	}
+
+	if (ptr == NULL)
+		fprintf(stderr, "Ptr Not found");
+
+	return ptr;
+}
+
 // symtable *create_entry(char *token_name, int token_type, val value)
 symtable *create_entry(char *token_name, int token_type, int scope)
 {
@@ -179,6 +196,173 @@ int return_type(symtable **table, char *token_name, int scope)
 		ptr = ptr->pred;
 	}
 	return ptr->token_type;
+}
+
+int return_int_val(symtable **table, char *token_name, int scope)
+{
+	int h = hash(token_name);
+	symtable *ptr = table[h];
+	while (ptr != NULL)
+	{
+		if (strcmp(ptr->token_name, token_name) == 0 && (ptr->scope == scope || ptr->token_type % FUNCTION == 0))
+			break;
+		ptr = ptr->pred;
+	}
+	return ptr->value.intval[0];
+}
+
+void create_int_arr(symtable **table, char *token_name, int scope, int offset)
+{
+	if(offset < 0)
+		fprintf(stderr, "Array size less than 0\n\n");
+
+	int h = hash(token_name);
+	symtable *ptr = table[h];
+	while (ptr != NULL)
+	{
+		if (strcmp(ptr->token_name, token_name) == 0 && (ptr->scope == scope || ptr->token_type % FUNCTION == 0))
+			break;
+		ptr = ptr->pred;
+	}
+
+	ptr->offset = offset;
+	ptr->value.intval = (int *)malloc(sizeof(int) * offset);
+}
+
+int return_int_arr(symtable **table, char *token_name, int scope, int offset)
+{
+	if(offset < 0)
+		fprintf(stderr, "Array size less than 0\n\n");
+
+	int h = hash(token_name);
+	symtable *ptr = table[h];
+	while (ptr != NULL)
+	{
+		if (strcmp(ptr->token_name, token_name) == 0 && (ptr->scope == scope || ptr->token_type % FUNCTION == 0))
+			break;
+		ptr = ptr->pred;
+	}
+
+	if(ptr->offset >= offset)
+		fprintf(stderr, "Exceeded array limit");
+	
+	return ptr->value.intval[offset];
+}
+
+char return_char_val(symtable **table, char *token_name, int scope)
+{
+	int h = hash(token_name);
+	symtable *ptr = table[h];
+	while (ptr != NULL)
+	{
+		if (strcmp(ptr->token_name, token_name) == 0 && (ptr->scope == scope || ptr->token_type % FUNCTION == 0))
+			break;
+		ptr = ptr->pred;
+	}
+	return ptr->value.charval;
+}
+
+char * return_string_val(symtable **table, char *token_name, int scope)
+{
+	int h = hash(token_name);
+	symtable *ptr = table[h];
+	while (ptr != NULL)
+	{
+		if (strcmp(ptr->token_name, token_name) == 0 && (ptr->scope == scope || ptr->token_type % FUNCTION == 0))
+			break;
+		ptr = ptr->pred;
+	}
+	return ptr->value.strval;
+}
+
+void * return_point_val(symtable **table, char *token_name, int scope)
+{
+	int h = hash(token_name);
+	symtable *ptr = table[h];
+	while (ptr != NULL)
+	{
+		if (strcmp(ptr->token_name, token_name) == 0 && (ptr->scope == scope || ptr->token_type % FUNCTION == 0))
+			break;
+		ptr = ptr->pred;
+	}
+
+	return ptr->value.ptr;
+}
+
+void add_int_val(symtable **table, char *token_name, int scope, int val)
+{
+	int h = hash(token_name);
+	symtable *ptr = table[h];
+	while (ptr != NULL)
+	{
+		if (strcmp(ptr->token_name, token_name) == 0 && (ptr->scope == scope || ptr->token_type % FUNCTION == 0))
+			break;
+		ptr = ptr->pred;
+	}
+
+	int * temp = (int *)malloc(sizeof(int));
+	*temp = val;
+	ptr->value.intval = temp;
+}
+
+void add_intarr_val(symtable **table, char *token_name, int scope, int val, int offset)
+{
+	if(offset < 0)
+		fprintf(stderr, "Array size less than 0\n\n");
+
+	int h = hash(token_name);
+	symtable *ptr = table[h];
+	while (ptr != NULL)
+	{
+		if (strcmp(ptr->token_name, token_name) == 0 && (ptr->scope == scope || ptr->token_type % FUNCTION == 0))
+			break;
+		ptr = ptr->pred;
+	}
+
+	if(ptr->offset >= offset)
+		fprintf(stderr, "Exceeded array limit");
+	
+	ptr->value.intval[offset] = val;
+}
+
+void add_char_val(symtable **table, char *token_name, int scope, char val)
+{
+	int h = hash(token_name);
+	symtable *ptr = table[h];
+	while (ptr != NULL)
+	{
+		if (strcmp(ptr->token_name, token_name) == 0 && (ptr->scope == scope || ptr->token_type % FUNCTION == 0))
+			break;
+		ptr = ptr->pred;
+	}
+	ptr->value.charval = val;
+}
+
+char * add_string_val(symtable **table, char *token_name, int scope, char * val)
+{
+	int h = hash(token_name);
+	symtable *ptr = table[h];
+	while (ptr != NULL)
+	{
+		if (strcmp(ptr->token_name, token_name) == 0 && (ptr->scope == scope || ptr->token_type % FUNCTION == 0))
+			break;
+		ptr = ptr->pred;
+	}
+	ptr->value.strval = (char *)malloc((strlen(val)+1) * sizeof(char));
+	strcpy(ptr->value.strval, val);
+}
+
+void add_point_val(symtable **table, char *token_name, int scope, char * token)
+{
+	int h = hash(token_name);
+	symtable *ptr = table[h];
+	while (ptr != NULL)
+	{
+		if (strcmp(ptr->token_name, token_name) == 0 && (ptr->scope == scope || ptr->token_type % FUNCTION == 0))
+			break;
+		ptr = ptr->pred;
+	}
+	ptr->value.ptr = return_location(table, token, scope);
 }
 
 void display(symtable **table)

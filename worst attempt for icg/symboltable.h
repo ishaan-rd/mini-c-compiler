@@ -16,9 +16,10 @@
 
 typedef struct vl
 {
-	int intval;
+	int *intval;
 	char charval;
 	char *strval;
+	void * ptr;
 } val;
 
 typedef struct pl
@@ -36,6 +37,8 @@ typedef struct sym_t
 	int * funs;
 	int nos;
 	struct sym_t *pred;
+	val value;
+	int offset;
 } symtable;
 
 typedef struct deft
@@ -57,6 +60,28 @@ int return_type(symtable **table, char *token_name, int scope);
 int yylex();
 
 int is_present(symtable **table, char *token_name, int scope);
+
+int return_int_val(symtable **table, char *token_name, int scope);
+
+void create_int_arr(symtable **table, char *token_name, int scope, int offset);
+
+int return_int_arr(symtable **table, char *token_name, int scope, int offset);
+
+char return_char_val(symtable **table, char *token_name, int scope);
+
+char* return_str_val(symtable **table, char *token_name, int scope);
+
+void * return_point_val(symtable **table, char *token_name, int scope);
+
+void add_int_val(symtable **table, char *token_name, int scope, int val);
+
+void add_int_arr(symtable **table, char *token_name, int scope, int val, int offset);
+
+void add_char_val(symtable **table, char *token_name, int scope, char val);
+
+void add_str_val(symtable **table, char *token_name, int scope, char * val);
+
+void add_point_val(symtable **table, char *token_name, int scope, char * token);
 
 void display(symtable **table);
 
