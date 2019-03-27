@@ -14,6 +14,7 @@
 #define VO 5
 #define FUNCTION 7
 
+<<<<<<< HEAD
 typedef struct pval
 {
 	void *ptr;
@@ -28,6 +29,8 @@ typedef struct vl
 	ptval * ptrval;
 } val;
 
+=======
+>>>>>>> dbc0191a597d3c886132b633a3a15c93433911a2
 typedef struct pl
 {
 	char *id;
@@ -44,6 +47,7 @@ typedef struct sym_t
 	int nos;
 	val value;
 	struct sym_t *pred;
+	int size;
 } symtable;
 
 typedef struct deft
@@ -79,5 +83,9 @@ defn_table *add_to_defn(defn_table *table, char *function_name, parameter *param
 int insert_func(symtable **table, char *token_name, int token_type, int scope, int i, parameter *parameter_list);
 
 void check_params(symtable **table, char *token_name, parameter *parameter_list);
+
+int insertArray(symtable **table, char *token_name, int token_type, int size, int scope);
+
+int isArray(symtable **table, char *token_name, int scope);
 
 #endif

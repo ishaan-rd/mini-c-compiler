@@ -7,5 +7,6 @@ a.exe
 *.tab.c
 *.output
 tester.c
+test.c
 y.tab.h
 y.tab.c
