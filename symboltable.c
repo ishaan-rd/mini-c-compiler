@@ -111,30 +111,6 @@ int insert(symtable **table, char *token_name, int token_type, int scope)
 	return 0;
 }
 
-int insertArray(symtable **table, char *token_name, int token_type, int size, int scope)
-{
-	int h = is_not_present(table, token_name, scope);
-
-	if (h == -1)
-	{
-		fprintf(stderr, "Redeclared variable.%s already exists. \n\n", token_name);
-		return 1;
-	}
-
-	if (table[h] == NULL)
-		table[h] = create_entry(token_name, token_type, scope);
-	else
-	{
-		symtable *entry = create_entry(token_name, token_type, scope);
-		symtable *ptr = table[h];
-		entry->pred = ptr;
-		entry->size = size;
-		table[h] = entry;
-	}
-
-	return 0;
-}
-
 int insert_func(symtable **table, char *token_name, int token_type, int scope, int i, parameter * parameter_list)
 {
 	int h = is_not_present(table, token_name, scope);
@@ -346,7 +322,31 @@ void check_params(symtable ** table, char * token_name, parameter * parameter_li
 	}
 }
 
-int isArray(symtable **table, char *token_name, int token_type, int size, int scope)
+int insertArray(symtable **table, char *token_name, int token_type, int size, int scope)
+{
+	int h = is_not_present(table, token_name, scope);
+
+	if (h == -1)
+	{
+		fprintf(stderr, "Redeclared variable.%s already exists. \n\n", token_name);
+		return 1;
+	}
+
+	if (table[h] == NULL)
+		table[h] = create_entry(token_name, token_type, scope);
+	else
+	{
+		symtable *entry = create_entry(token_name, token_type, scope);
+		symtable *ptr = table[h];
+		entry->pred = ptr;
+		entry->size = size;
+		table[h] = entry;
+	}
+
+	return 0;
+}
+
+int isArray(symtable **table, char *token_name, int scope)
 {
 	int h = hash(token_name);
 	symtable *ptr = table[h];

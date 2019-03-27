@@ -173,7 +173,7 @@ gl_delarationlist:
 		;
 
 gl_declare: identifier								{ insert(table, $1, current_dt, -1); }
-		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, -1); if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");}}
+		| identifier PUN_SQO arithmetic_exp PUN_SQC		{ if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");} insertArray(table, $1, current_dt * current_dt, -1, $3.val);}
 		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, $3);}
 		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, $3.type);}
 		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, -1); int x = type_get($4); check_both_type(current_dt, x*x);}
@@ -207,10 +207,26 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type(
 		| identifier OP_ASS CONSTANT_CHAR					{id_present($1); check_type($1, CH);}
 		| identifier OP_ASS function_call					{id_present($1); check_type($1, $3);}
 		| identifier OP_ASS OP_ADR identifier				{id_present($1); id_present($4); int x =  type_get($4); check_type($1, x * x);}
-		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { id_present($1); id_present($3); if($5.val < 0 || $5.type != I){yyerror("Array index less than 0");} int x = type_get($1); check_type($3, x * x);}
+		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { 
+																id_present($1); id_present($3);
+																int t = isArray(table, $3, scope);
+																if(t==0)
+																{
+																	t = isArray(table, $3, -1);
+																}
+																if($5.val < 0 || $5.type != I || $5.val >= t)
+																	{yyerror("Array index invalid dimension");} 
+																int x = type_get($1); 
+																check_type($3, x * x);
+															}
 		| identifier OP_ASS point_exp						{id_present($1); check_type($1, $3);}
 		| identifier OP_INC									{id_present($1); check_type($1, I);}
 		| identifier OP_DEC									{id_present($1); ($1, I);}
+		| identifier PUN_SQO arithmetic_exp PUN_SQC OP_ASS identifier { 
+																id_present($1); id_present($5); 
+																if($3.val < 0 || $3.type != I || $3.val >= ){yyerror("Array index less than 0");} 
+																int x = type_get($5); check_type($1, x * x);
+															}
 		;
 
 point_exp: OP_MUL identifier								{$$ = type_get($2) * type_get($2);}
@@ -300,7 +316,7 @@ delarationlist:
 		;
 
 declare: identifier								{ insert(table, $1, current_dt, scope); }
-		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, scope); if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");}}
+		| identifier PUN_SQO arithmetic_exp PUN_SQC		{ if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");} insertArray(table, $1, current_dt * current_dt, scope, $3.val);}
 		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3);}
 		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3.type);}
 		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, scope); int x = type_get($4); check_both_type(current_dt, x*x);}
