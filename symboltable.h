@@ -66,4 +66,8 @@ int insert_func(symtable **table, char *token_name, int token_type, int scope, i
 
 void check_params(symtable ** table, char * token_name, parameter * parameter_list);
 
+int insertArray(symtable **table, char *token_name, int token_type, int size, int scope);
+
+int isArray(symtable **table, char *token_name, int scope);
+
 #endif

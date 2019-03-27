@@ -19,8 +19,6 @@
 	int is_function_over = 1;
 	parameter * parameter_list = NULL;
 
-	val value;
-
 	int max(int a, int b)
 	{
 		if(a>b)
@@ -173,7 +171,7 @@ gl_delarationlist:
 		;
 
 gl_declare: identifier								{ insert(table, $1, current_dt, -1); }
-		| identifier PUN_SQO arithmetic_exp PUN_SQC		{ if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");} insertArray(table, $1, current_dt * current_dt, -1, $3.val);}
+		| identifier PUN_SQO arithmetic_exp PUN_SQC		{ if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");} insertArray(table, $1, current_dt * current_dt, $3.val, -1);}
 		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, $3);}
 		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, $3.type);}
 		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, -1); int x = type_get($4); check_both_type(current_dt, x*x);}
@@ -222,10 +220,16 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type(
 		| identifier OP_ASS point_exp						{id_present($1); check_type($1, $3);}
 		| identifier OP_INC									{id_present($1); check_type($1, I);}
 		| identifier OP_DEC									{id_present($1); ($1, I);}
-		| identifier PUN_SQO arithmetic_exp PUN_SQC OP_ASS identifier { 
-																id_present($1); id_present($5); 
-																if($3.val < 0 || $3.type != I || $3.val >= ){yyerror("Array index less than 0");} 
-																int x = type_get($5); check_type($1, x * x);
+		| identifier PUN_SQO arithmetic_exp PUN_SQC OP_ASS arithmetic_exp { 
+																id_present($1); 
+																int t = isArray(table, $1, scope);
+																if(t==0)
+																{
+																	t = isArray(table, $1, -1);
+																}
+																printf("t is %d\n", t);
+																if($3.val < 0 || $3.type != I || $3.val >= t){yyerror("Array index less than 0");} 
+																int x = $6.type; check_type($1, x * x);
 															}
 		;
 
@@ -316,7 +320,7 @@ delarationlist:
 		;
 
 declare: identifier								{ insert(table, $1, current_dt, scope); }
-		| identifier PUN_SQO arithmetic_exp PUN_SQC		{ if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");} insertArray(table, $1, current_dt * current_dt, scope, $3.val);}
+		| identifier PUN_SQO arithmetic_exp PUN_SQC		{ if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");} insertArray(table, $1, current_dt * current_dt, $3.val, scope);}
 		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3);}
 		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3.type);}
 		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, scope); int x = type_get($4); check_both_type(current_dt, x*x);}

@@ -332,11 +332,13 @@ int insertArray(symtable **table, char *token_name, int token_type, int size, in
 		return 1;
 	}
 
+	symtable *entry = create_entry(token_name, token_type, scope);
+	entry->size = size;
+
 	if (table[h] == NULL)
-		table[h] = create_entry(token_name, token_type, scope);
+		table[h] = entry;
 	else
 	{
-		symtable *entry = create_entry(token_name, token_type, scope);
 		symtable *ptr = table[h];
 		entry->pred = ptr;
 		entry->size = size;
