@@ -14,13 +14,6 @@
 #define VO 5
 #define FUNCTION 7
 
-typedef struct vl
-{
-	int intval;
-	char charval;
-	char *strval;
-} val;
-
 typedef struct pl
 {
 	char *id;
