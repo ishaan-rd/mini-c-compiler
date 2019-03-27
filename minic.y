@@ -6,7 +6,7 @@
 	struct exp {
 		int type; 
 		int val;
-	}
+	};
 
 	symtable ** table = NULL;
 
@@ -79,7 +79,7 @@
 
 
 // Symbol table
-%union {char* token_name; int int_val; char char_val; char * string_val; struct exp exp_val;}
+%union {char* token_name; int int_val; char char_val; char * string_val; struct exp exp_type;}
 
 %token SEMICOLON 
 
@@ -173,7 +173,7 @@ gl_delarationlist:
 		;
 
 gl_declare: identifier								{ insert(table, $1, current_dt, -1); }
-		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, -1); if($3 <= 0){yyerror("Array size less than 1");}}
+		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, -1); if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");}}
 		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, $3);}
 		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, I);}
 		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, -1); int x = type_get($4); check_both_type(current_dt, x*x);}
@@ -184,7 +184,7 @@ exp:	arithmetic_exp
 		;
 
 arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val && $3.val;}
-		| arithmetic_exp OP_OR arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val || $.val;}
+		| arithmetic_exp OP_OR arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val || $3.val;}
 		| arithmetic_exp OP_LT arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val < $3.val;}
 		| arithmetic_exp OP_GT arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val > $3.val;}
 		| arithmetic_exp OP_LE arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val <= $3.val;}
@@ -195,9 +195,9 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{ $$.type = I; check_ty
 		| arithmetic_exp OP_MUL arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val * $3.val;}
 		| arithmetic_exp OP_DIV arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val / $3.val;}
 		| arithmetic_exp OP_MOD arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val % $3.val;}
-		| OP_SUB arithmetic_exp %prec UMINUS				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = -$2.val;}
-		| OP_ADD arithmetic_exp %prec UMINUS				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = +$2.val;}
-		| PUN_BO arithmetic_exp PUN_BC						{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = ($2.val);}
+		| OP_SUB arithmetic_exp %prec UMINUS				{ $$.type = I; check_type_arith(I, $2.type); $$.val = -$2.val;}
+		| OP_ADD arithmetic_exp %prec UMINUS				{ $$.type = I; check_type_arith(I, $2.type); $$.val = +$2.val;}
+		| PUN_BO arithmetic_exp PUN_BC						{ $$.type = I; check_type_arith(I, $2.type); $$.val = ($2.val);}
 		| identifier										{ id_present($1); $$.type = type_get($1); $$.type = type_get($1); $$.val = 2;}
 		| CONSTANT_INT										{ $$.type = I; $$.val = $1;}
 		;
@@ -206,7 +206,7 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type(
 		| identifier OP_ASS CONSTANT_CHAR					{id_present($1); check_type($1, CH);}
 		| identifier OP_ASS function_call					{id_present($1); check_type($1, $3);}
 		| identifier OP_ASS OP_ADR identifier				{id_present($1); id_present($4); int x =  type_get($4); check_type($1, x * x);}
-		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { id_present($1); id_present($3); if($5 < 0){yyerror("Array index less than 0");} int x = type_get($1); check_type($3, x * x);}
+		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { id_present($1); id_present($3); if($5.val < 0 || $5.type != I){yyerror("Array index less than 0");} int x = type_get($1); check_type($3, x * x);}
 		| identifier OP_ASS point_exp						{id_present($1); check_type($1, $3);}
 		| identifier OP_INC									{id_present($1); check_type($1, I);}
 		| identifier OP_DEC									{id_present($1); ($1, I);}
@@ -299,7 +299,7 @@ delarationlist:
 		;
 
 declare: identifier								{ insert(table, $1, current_dt, scope); }
-		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, scope); if($3 <= 0){yyerror("Array size less than 1");}}
+		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, scope); if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");}}
 		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3);}
 		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, I);}
 		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, scope); int x = type_get($4); check_both_type(current_dt, x*x);}
