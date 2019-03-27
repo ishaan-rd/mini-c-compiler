@@ -227,8 +227,7 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type(
 																{
 																	t = isArray(table, $1, -1);
 																}
-																printf("t is %d\n", t);
-																if($3.val < 0 || $3.type != I || $3.val >= t){yyerror("Array index less than 0");} 
+																if($3.val < 0 || $3.type != I || $3.val >= t){yyerror("Array index invalid dimension");} 
 																int x = $6.type; check_type($1, x * x);
 															}
 		;
