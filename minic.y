@@ -175,7 +175,7 @@ gl_delarationlist:
 gl_declare: identifier								{ insert(table, $1, current_dt, -1); }
 		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, -1); if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");}}
 		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, $3);}
-		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, I);}
+		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, $3.type);}
 		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, -1); int x = type_get($4); check_both_type(current_dt, x*x);}
 		;
 
@@ -202,7 +202,7 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{ $$.type = I; check_ty
 		| CONSTANT_INT										{ $$.type = I; $$.val = $1;}
 		;
 
-assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type($1, I);}
+assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type($1, $3.type);}
 		| identifier OP_ASS CONSTANT_CHAR					{id_present($1); check_type($1, CH);}
 		| identifier OP_ASS function_call					{id_present($1); check_type($1, $3);}
 		| identifier OP_ASS OP_ADR identifier				{id_present($1); id_present($4); int x =  type_get($4); check_type($1, x * x);}
@@ -301,7 +301,7 @@ delarationlist:
 declare: identifier								{ insert(table, $1, current_dt, scope); }
 		| identifier PUN_SQO arithmetic_exp PUN_SQC		{insert(table, $1, current_dt * current_dt, scope); if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");}}
 		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3);}
-		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, I);}
+		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3.type);}
 		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, scope); int x = type_get($4); check_both_type(current_dt, x*x);}
 		;
 
