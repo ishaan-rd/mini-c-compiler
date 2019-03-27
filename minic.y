@@ -3,6 +3,11 @@
 	
 	void yyerror(char *);
 
+	struct exp {
+		int type; 
+		int val;
+	}
+
 	symtable ** table = NULL;
 
 	defn_table * DT = NULL;
@@ -29,6 +34,18 @@
 		{ 
 			printf("\n%s does not exist\n", id); 
 			yyerror("Undeclared variable\n"); 
+		}
+	}
+
+	void check_type_arith(int tp1, int tp2)
+	{
+		if(tp1 != I)
+		{
+			yyerror("invalid type variable\n");
+		}
+		else if(tp1 != tp2)
+		{
+			yyerror("invalid type variable\n");
 		}
 	}
 
@@ -60,8 +77,9 @@
 
 %}
 
+
 // Symbol table
-%union {char* token_name; int int_val; char char_val; char * string_val;}
+%union {char* token_name; int int_val; char char_val; char * string_val; struct exp exp_val;}
 
 %token SEMICOLON 
 
@@ -105,7 +123,9 @@
 
 %type <token_name> identifier
 
-%type <int_val> type arithmetic_exp function_call point_exp function_start
+%type <int_val> type function_call point_exp function_start
+
+%type <exp_type> arithmetic_exp
 
 %left PUN_COM
 %left OP_OR OP_AND
@@ -163,23 +183,23 @@ exp:	arithmetic_exp
 		| assignment_exp
 		;
 
-arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{ $$ = $1 && $3;}
-		| arithmetic_exp OP_OR arithmetic_exp				{ $$ = $1 || $3;}
-		| arithmetic_exp OP_LT arithmetic_exp				{ $$ = $1 < $3;}
-		| arithmetic_exp OP_GT arithmetic_exp				{ $$ = $1 > $3;}
-		| arithmetic_exp OP_LE arithmetic_exp				{ $$ = $1 <= $3;}
-		| arithmetic_exp OP_GE arithmetic_exp				{ $$ = $1 >= $3;}
-		| arithmetic_exp OP_EE arithmetic_exp				{ $$ = $1 == $3;}
-		| arithmetic_exp OP_SUB arithmetic_exp				{ $$ = $1 - $3;}
-		| arithmetic_exp OP_ADD arithmetic_exp				{ $$ = $1 + $3;}
-		| arithmetic_exp OP_MUL arithmetic_exp				{ $$ = $1 * $3;}
-		| arithmetic_exp OP_DIV arithmetic_exp				{ $$ = $1 / $3;}
-		| arithmetic_exp OP_MOD arithmetic_exp				{ $$ = $1 % $3;}
-		| OP_SUB arithmetic_exp %prec UMINUS				{ $$ = -$2;}
-		| OP_ADD arithmetic_exp %prec UMINUS				{ $$ = +$2;}
-		| PUN_BO arithmetic_exp PUN_BC						{ $$ = ($2);}
-		| identifier										{ $$ = 2; id_present($1); check_type($1, I); }
-		| CONSTANT_INT										{ $$ = $1;}
+arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val && $3.val;}
+		| arithmetic_exp OP_OR arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val || $.val;}
+		| arithmetic_exp OP_LT arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val < $3.val;}
+		| arithmetic_exp OP_GT arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val > $3.val;}
+		| arithmetic_exp OP_LE arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val <= $3.val;}
+		| arithmetic_exp OP_GE arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val >= $3.val;}
+		| arithmetic_exp OP_EE arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val == $3.val;}
+		| arithmetic_exp OP_SUB arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val - $3.val;}
+		| arithmetic_exp OP_ADD arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val + $3.val;}
+		| arithmetic_exp OP_MUL arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val * $3.val;}
+		| arithmetic_exp OP_DIV arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val / $3.val;}
+		| arithmetic_exp OP_MOD arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val % $3.val;}
+		| OP_SUB arithmetic_exp %prec UMINUS				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = -$2.val;}
+		| OP_ADD arithmetic_exp %prec UMINUS				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = +$2.val;}
+		| PUN_BO arithmetic_exp PUN_BC						{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = ($2.val);}
+		| identifier										{ id_present($1); $$.type = type_get($1); $$.type = type_get($1); $$.val = 2;}
+		| CONSTANT_INT										{ $$.type = I; $$.val = $1;}
 		;
 
 assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type($1, I);}

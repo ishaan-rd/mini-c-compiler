@@ -36,6 +36,7 @@ typedef struct sym_t
 	int * funs;
 	int nos;
 	struct sym_t *pred;
+	int size;
 } symtable;
 
 typedef struct deft
