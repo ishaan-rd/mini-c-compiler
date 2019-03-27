@@ -14,29 +14,7 @@
 	int is_function_over = 1;
 	parameter * parameter_list = NULL;
 
-	// void set_scope(char * scp)
-	// {
-	// 	scope = (char *)malloc(sizeof(char)*(strlen(scp)+1));
-	// 	strcpy(scope, scp);
-	// }
-
 	val value;
-
-	// void set_int(int val)
-	// {
-	// 	value.intval = val;
-	// }
-
-	// void set_char(char val)
-	// {
-	// 	value.charval = val;
-	// }
-
-	// void set_str(char * val)
-	// {
-	// 	value.str_val = (char *)malloc(sizeof(char)*(strlen(val)+1));
-	// 	strcpy(value.str_val, val);
-	// }
 
 	int max(int a, int b)
 	{
