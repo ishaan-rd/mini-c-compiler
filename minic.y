@@ -19,28 +19,6 @@
 	int is_function_over = 1;
 	parameter * parameter_list = NULL;
 
-<<<<<<< HEAD
-	val value;
-
-	// void set_int(int val)
-	// {
-	// 	value.intval = val;
-	// }
-
-	// void set_char(char val)
-	// {
-	// 	value.charval = val;
-	// }
-
-	char * dup_str(char * val)
-	{
-		char * temp = (char *)malloc(sizeof(char)*(strlen(val)+1));
-		strcpy(temp, val);
-		return temp;
-	}
-
-=======
->>>>>>> dbc0191a597d3c886132b633a3a15c93433911a2
 	int max(int a, int b)
 	{
 		if(a>b)

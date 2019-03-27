@@ -4,6 +4,13 @@
 
 #include "symboltable.h"
 
+typedef struct vl
+{
+	int intval;
+	char charval;
+	char *strval;
+} val;
+
 int return_int_val(symtable **table, char *token_name, int scope);
 
 char return_char_val(symtable **table, char *token_name, int scope);

@@ -14,23 +14,6 @@
 #define VO 5
 #define FUNCTION 7
 
-<<<<<<< HEAD
-typedef struct pval
-{
-	void *ptr;
-	struct pval * next;
-} ptval;
-
-typedef struct vl
-{
-	int intval;
-	char charval;
-	char *strval;
-	ptval * ptrval;
-} val;
-
-=======
->>>>>>> dbc0191a597d3c886132b633a3a15c93433911a2
 typedef struct pl
 {
 	char *id;
@@ -45,7 +28,6 @@ typedef struct sym_t
 	int scope;
 	int *funs;
 	int nos;
-	val value;
 	struct sym_t *pred;
 	int size;
 } symtable;
