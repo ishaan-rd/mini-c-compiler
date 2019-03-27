@@ -14,11 +14,18 @@
 #define VO 5
 #define FUNCTION 7
 
+typedef struct pval
+{
+	void *ptr;
+	struct pval * next;
+} ptval;
+
 typedef struct vl
 {
 	int intval;
 	char charval;
 	char *strval;
+	ptval * ptrval;
 } val;
 
 typedef struct pl
@@ -33,8 +40,9 @@ typedef struct sym_t
 	char *token_name;
 	int token_type;
 	int scope;
-	int * funs;
+	int *funs;
 	int nos;
+	val value;
 	struct sym_t *pred;
 } symtable;
 
@@ -68,8 +76,8 @@ int parameter_to_symtable(symtable **table, parameter *parameter_list, int scope
 
 defn_table *add_to_defn(defn_table *table, char *function_name, parameter *parameter_list);
 
-int insert_func(symtable **table, char *token_name, int token_type, int scope, int i, parameter * parameter_list);
+int insert_func(symtable **table, char *token_name, int token_type, int scope, int i, parameter *parameter_list);
 
-void check_params(symtable ** table, char * token_name, parameter * parameter_list);
+void check_params(symtable **table, char *token_name, parameter *parameter_list);
 
 #endif

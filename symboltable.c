@@ -110,7 +110,7 @@ int insert(symtable **table, char *token_name, int token_type, int scope)
 	return 0;
 }
 
-int insert_func(symtable **table, char *token_name, int token_type, int scope, int i, parameter * parameter_list)
+int insert_func(symtable **table, char *token_name, int token_type, int scope, int i, parameter *parameter_list)
 {
 	int h = is_not_present(table, token_name, scope);
 	symtable *entry = create_entry(token_name, token_type, scope);
@@ -120,9 +120,10 @@ int insert_func(symtable **table, char *token_name, int token_type, int scope, i
 		return 1;
 	}
 	int j = 0;
-	int * A = (int *)malloc(sizeof(int) * i);
+	int *A = (int *)malloc(sizeof(int) * i);
 
-	while(parameter_list != NULL){
+	while (parameter_list != NULL)
+	{
 		A[j] = parameter_list->type;
 		parameter_list = parameter_list->next;
 		j++;
@@ -288,7 +289,7 @@ defn_table *add_to_defn(defn_table *table, char *function_name, parameter *param
 	return table;
 };
 
-void check_params(symtable ** table, char * token_name, parameter * parameter_list)
+void check_params(symtable **table, char *token_name, parameter *parameter_list)
 {
 	int h = hash(token_name);
 	symtable *ptr = table[h];
@@ -301,9 +302,9 @@ void check_params(symtable ** table, char * token_name, parameter * parameter_li
 	int i = 0;
 	int isError = 0;
 
-	while(parameter_list!=NULL && i < ptr->nos)
+	while (parameter_list != NULL && i < ptr->nos)
 	{
-		if(ptr->funs[i] == parameter_list->type)
+		if (ptr->funs[i] == parameter_list->type)
 		{
 			i++;
 			parameter_list = parameter_list->next;
@@ -315,7 +316,7 @@ void check_params(symtable ** table, char * token_name, parameter * parameter_li
 		}
 	}
 
-	if(isError || parameter_list != NULL || i < ptr->nos)
+	if (isError || parameter_list != NULL || i < ptr->nos)
 	{
 		fprintf(stderr, "ERROR FUNCTION CALL\n");
 	}
