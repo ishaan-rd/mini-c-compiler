@@ -282,10 +282,10 @@ type_list: type									{parameter_list = add_parameter(parameter_list, (char *)
 function_start: type identifier functionparameters 	{
 														scope = max(max_scope, scope) + 1; int i = parameter_to_symtable(table, parameter_list, scope + 1); 
 														insert_func(table, strdup($2), FUNCTION * $1, -1, i, parameter_list); 
-														gencode(S($2) + ":");
+														gencode(S($2) + " :");
 														while(parameter_list != NULL)
 														{
-															gencode("arg" + S(parameter_list->id));
+															gencode("arg " + S(parameter_list->id));
 															parameter_list = parameter_list->next;
 														}
 														parameter_list = NULL; 
@@ -382,6 +382,7 @@ int main (int argc, char * argv[]) {
 
 	display(table);
 
+	displayICG();
 	// display_dt(DT);
 
 	fclose(yyin);

@@ -10,3 +10,4 @@ tester.c
 test.c
 y.tab.h
 y.tab.c
+*.code
