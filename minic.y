@@ -280,15 +280,6 @@ type_list: type									{parameter_list = add_parameter(parameter_list, (char *)
 		;
 
 function_start: type identifier functionparameters 	{
-<<<<<<< HEAD
-									scope = max(max_scope, scope) + 1; 
-									int i = parameter_to_symtable(table, parameter_list, scope + 1); 
-									insert_func(table, strdup($2), FUNCTION * $1, -1, i, parameter_list); 
-									parameter_list = NULL; 
-									$$ = $1;
-									gen
-								} 
-=======
 														scope = max(max_scope, scope) + 1; int i = parameter_to_symtable(table, parameter_list, scope + 1); 
 														insert_func(table, strdup($2), FUNCTION * $1, -1, i, parameter_list); 
 														gencode(S($2) + ":");
@@ -300,7 +291,6 @@ function_start: type identifier functionparameters 	{
 														parameter_list = NULL; 
 														$$ = $1;	
 													} 
->>>>>>> ee6f2567e3cdba69837a174389f2fb2e84599161
 		;
 
 function: function_start scoped_statements			{if((is_function_over == 0 && $1 != ret_type) || (is_function_over == 1 && $1 != VO)){printf("%d", $1); yyerror("INVAID RETURN TYPE");} is_function_over = 1;}
