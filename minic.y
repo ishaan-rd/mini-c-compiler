@@ -609,23 +609,24 @@ scoped_unscoped_statements: scoped_statements	{}
 		| statement
 		;
 
-if:		IF PUN_BO exp PUN_BC scoped_unscoped_statements %prec LOWER_THAN_ELSE
-		|IF PUN_BO exp PUN_BC scoped_unscoped_statements ELSE scoped_unscoped_statements
+if:		IF PUN_BO arithmetic_exp PUN_BC scoped_unscoped_statements %prec LOWER_THAN_ELSE
+		|IF PUN_BO arithmetic_exp PUN_BC scoped_unscoped_statements ELSE scoped_unscoped_statements
     	;
 
 
-for:	FOR PUN_BO for_exp for_exp exp PUN_BC scoped_unscoped_statements	
+for:	FOR PUN_BO for_exp for_exp arithmetic_exp PUN_BC scoped_unscoped_statements	
 		|FOR PUN_BO for_exp for_exp PUN_BC scoped_unscoped_statements
 		;
 
-for_exp: exp SEMICOLON
+for_exp: arithmetic_exp SEMICOLON
 		| SEMICOLON
 		;
 
-while:	WHILE PUN_BO exp PUN_BC scoped_unscoped_statements
-		;
-
 %%
+
+
+// while:	WHILE PUN_BO exp PUN_BC scoped_unscoped_statements
+// 		;
 
 #include "lex.yy.c"
 
