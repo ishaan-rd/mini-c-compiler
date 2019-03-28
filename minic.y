@@ -31,6 +31,23 @@
 		return b;
 	}
 
+	int floorSqrt(int x) 
+	{ 
+		// Base cases 
+		if (x == 0 || x == 1) 
+		return x; 
+	
+		// Staring from 1, try all numbers until 
+		// i*i is greater than or equal to x. 
+		int i = 1, result = 1; 
+		while (result <= x) 
+		{ 
+		i++; 
+		result = i * i; 
+		} 
+		return i - 1; 
+	} 
+
 	string S(char *str)
 	{
 		string temp(str);
@@ -48,11 +65,20 @@
 		return x;
 	}
 
+	string S(char c)
+	{
+		char * temp = new char(2);
+		temp[1] = c;
+		string x(temp);
+		return x;
+	}
+
 	string S(int x)
 	{
 		string temp = std::to_string(x);
 		return temp;
 	}
+
 	void id_present(char * id)
 	{
  		if(is_present(table, id, scope)==-1)
@@ -148,9 +174,9 @@
 
 %type <token_name> identifier
 
-%type <int_val> type function_call point_exp function_start
+%type <int_val> type function_call function_start
 
-%type <exp_type> arithmetic_exp
+%type <exp_type> arithmetic_exp point_exp
 
 %left PUN_COM
 %left OP_OR OP_AND
@@ -329,10 +355,27 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 															}
 		;
 
-assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type($1, $3.type);}
-		| identifier OP_ASS CONSTANT_CHAR					{id_present($1); check_type($1, CH);}
-		| identifier OP_ASS function_call					{id_present($1); check_type($1, $3);}
-		| identifier OP_ASS OP_ADR identifier				{id_present($1); id_present($4); int x =  type_get($4); check_type($1, x * x);}
+assignment_exp:  identifier OP_ASS arithmetic_exp			{
+																id_present($1); 
+																check_type($1, $3.type);
+																gencode_math(S($1), S($3.code), "", "");
+															}
+		| identifier OP_ASS CONSTANT_CHAR					{
+																id_present($1); 
+																check_type($1, CH);
+																gencode_math(S($1), S($3), "", "");
+															}
+		| identifier OP_ASS function_call					{
+																id_present($1); 
+																check_type($1, $3);
+															}
+		| identifier OP_ASS OP_ADR identifier				{
+																id_present($1); 
+																id_present($4); int x =  type_get($4); check_type($1, x * x);
+																const char * t1 = generateTemp();
+																gencode(S(t1) + " = addr(" + S($4) + ")");
+																gencode(S($1) + " = " + S(t1));
+															}
 		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { 
 																id_present($1); id_present($3);
 																int t = isArray(table, $3, scope);
@@ -344,10 +387,41 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type(
 																	{yyerror("Array index invalid dimension");} 
 																int x = type_get($1); 
 																check_type($3, x * x);
+																const char * t1 = generateTemp();
+																gencode(S(t1) + " = addr(" + S($3) + ")");
+																gencode(S($1) + " = " + S(t1) + "[" + S($5.code) + "]");
 															}
-		| identifier OP_ASS point_exp						{id_present($1); check_type($1, $3);}
-		| identifier OP_INC									{id_present($1); check_type($1, I);}
-		| identifier OP_DEC									{id_present($1); ($1, I);}
+		| identifier OP_ASS point_exp						{
+																id_present($1);
+																check_type($1, $3.type);
+																int x = $3.val;
+																char * t = (char *)generateTemp();
+																string prev;
+																prev = S(t);
+																gencode(prev + " = *" + $3.code);
+
+																while(x-2)
+																{
+																	t = (char *)generateTemp();
+																	gencode(S(t) + " = *" + prev);
+																	prev = S(t);
+																	x--;
+																}
+																gencode(S($1) + " = *" + prev);
+															}
+		| identifier OP_INC									{
+																id_present($1); 
+																check_type($1, I);
+																const char * t1 = generateTemp();
+																gencode(S(t1) + " = " + S($1) + " + 1");
+																gencode(S($1) + " = " + S(t1));
+															}
+		| identifier OP_DEC									{
+																id_present($1); check_type($1, I);
+																const char * t1 = generateTemp();
+																gencode(S(t1) + " = " + S($1) + " - 1");
+																gencode(S($1) + " = " + S(t1));
+															}
 		| identifier PUN_SQO arithmetic_exp PUN_SQC OP_ASS arithmetic_exp { 
 																id_present($1); 
 																int t = isArray(table, $1, scope);
@@ -357,11 +431,31 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type(
 																}
 																if($3.val < 0 || $3.type != I || $3.val >= t){yyerror("Array index invalid dimension");} 
 																int x = $6.type; check_type($1, x * x);
+																const char * t1 = generateTemp();
+																gencode(S(t1) + " = addr(" + S($1) + ")");
+																string instruction = S(t1) + "[" + S($3.code) + "]" + " = " + S($6.code);
+																gencode(instruction);
 															}
 		;
 
-point_exp: OP_MUL identifier								{$$ = type_get($2) * type_get($2);}
-		| OP_MUL point_exp									{$$ = $2 * $2;}
+point_exp: OP_MUL identifier								{
+																if(type_get($2) == I || type_get($2) == CH)
+																		yyerror("Invalid type");
+
+																$$.type = floorSqrt(type_get($2));
+																$$.val = 1;
+																$$.code = new char(strlen($2)+1);
+																strcpy($$.code, $2);
+															}
+		| OP_MUL point_exp									{
+																if($2.type == I || $2.type == CH)
+																		yyerror("Invalid type");
+
+																$$.type = floorSqrt($2.type);														
+																$$.val = $2.val + 1;
+																$$.code = new char(strlen($2.code)+1);
+																strcpy($$.code, $2.code);
+															}
 		;
 
 function_call: identifier PUN_BO untyped_parameterlist PUN_BC 	{id_present($1); $$ = type_get_fc($1); check_params(table, $1, parameter_list); parameter_list = NULL;}
@@ -375,12 +469,12 @@ untyped_parameterlist: identifier							{parameter_list = add_parameter(paramete
 		| CONSTANT_INT										{parameter_list = add_parameter(parameter_list, (char *)"P", I);}
 		| CONSTANT_CHAR										{parameter_list = add_parameter(parameter_list, (char *)"P", CH);}
 		| CONSTANT_STR										{parameter_list = add_parameter(parameter_list, (char *)"P", CH * CH);}
-		| point_exp											{parameter_list = add_parameter(parameter_list, (char *)"P", $1);}
+		| point_exp											{parameter_list = add_parameter(parameter_list, (char *)"P", $1.type);}
 		| untyped_parameterlist PUN_COM identifier			{parameter_list = add_parameter(parameter_list, (char *)"P", type_get($3));}
 		| untyped_parameterlist PUN_COM CONSTANT_INT		{parameter_list = add_parameter(parameter_list, (char *)"P", I);}
 		| untyped_parameterlist PUN_COM CONSTANT_CHAR		{parameter_list = add_parameter(parameter_list, (char *)"P", CH);}
 		| untyped_parameterlist PUN_COM CONSTANT_STR		{parameter_list = add_parameter(parameter_list, (char *)"P", CH * CH);}
-		| untyped_parameterlist PUN_COM point_exp			{parameter_list = add_parameter(parameter_list, (char *)"P", $3);}
+		| untyped_parameterlist PUN_COM point_exp			{parameter_list = add_parameter(parameter_list, (char *)"P", $3.type);}
 		;
 
 function_definition: type identifier function_defn_parameters SEMICOLON	{ DT = add_to_defn(DT, $2, parameter_list); parameter_list = NULL;}
