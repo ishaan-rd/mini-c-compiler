@@ -128,6 +128,8 @@
 		}
 	}
 
+	vector<int>v;
+
 %}
 
 
@@ -709,12 +711,15 @@ scoped_unscoped_statements: scoped_statements	{}
 		;
 
 
-if_start: IF PUN_BO arithmetic_exp PUN_BC
+if_start: IF PUN_BO arithmetic_exp PUN_BC		{
+													gencode("if " + S($3.exp) + " goto ");
+													v.push_back(line_no());
+												}
 		;
 
 if:	if_start scoped_unscoped_statements %prec LOWER_THAN_ELSE 
 												{
-													
+													back_track
 												}
 	|if_start scoped_unscoped_statements else
 												{

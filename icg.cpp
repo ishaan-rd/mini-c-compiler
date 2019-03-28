@@ -1,5 +1,5 @@
 #include "icg.h"
-#include<string.h>
+#include <string.h>
 #include <fstream>
 #include <string>
 
@@ -25,13 +25,21 @@ void gencode_math(string left, string fi, string op, string se)
     gencode(instruction);
 }
 
-const char * generateTemp(){
+const char *generateTemp()
+{
     string temp = "t" + std::to_string(temp_var_number);
     temp_var_number++;
     return temp.c_str();
-    // char *cstr = new char[temp.length() + 1];
-    // strcpy(cstr, );
-    // return cstr;
+}
+
+void back_track(vector<int> x, int line_no)
+{
+    
+}
+
+int line_no()
+{
+    return nextinstr;
 }
 
 // void gencode_rel(content_t *&lhs, content_t *arg1, content_t *arg2, const string &op)
