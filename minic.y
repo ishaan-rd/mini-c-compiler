@@ -232,10 +232,6 @@ gl_declare: identifier								{ insert(table, $1, current_dt, -1); }
 		| identifier OP_ASS CONSTANT_CHAR		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, CH);}
 		;
 
-exp:	arithmetic_exp
-		| assignment_exp
-		;
-
 arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{ 
 																$$.type = I; check_type_arith($1.type, $3.type); 
 																$$.val = $1.val && $3.val;
@@ -433,7 +429,7 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{
 																char * temp2 = (char *)malloc((strlen(t2) + 1) * sizeof(char));
 																strcpy(temp2, t2);
 																gencode(S(t2) + " = " + "1");
-																gencode(S(t1) + " = " + S(temp2);
+																gencode(S(t1) + " = " + S(temp2));
 																gencode(S($1) + " = " + S(temp) + " + " + S(temp2));
 															}
 		| identifier OP_DEC									{
@@ -446,7 +442,7 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{
 																char * temp2 = (char *)malloc((strlen(t2) + 1) * sizeof(char));
 																strcpy(temp2, t2);
 																gencode(S(t2) + " = " + "1");
-																gencode(S(t1) + " = " + S(temp2);
+																gencode(S(t1) + " = " + S(temp2));
 																gencode(S($1) + " = " + S(temp) + " - " + S(temp2));
 															}
 		| identifier PUN_SQO arithmetic_exp PUN_SQC OP_ASS arithmetic_exp { 
@@ -559,7 +555,6 @@ assignment_list: assignment_exp
 
 statement: if
 		| for
-		| while
 		| RETURN SEMICOLON							{if(is_function_over == 1){is_function_over = 0; ret_type = VO;} else if(ret_type != VO){ yyerror("INVALID RETURN TYPE");}}
 		| RETURN identifier SEMICOLON				{if(is_function_over == 1){is_function_over = 0; ret_type = type_get($2);} else if(ret_type != type_get($2)){ yyerror("INVALID RETURN TYPE");}}
 		| RETURN CONSTANT_INT SEMICOLON				{if(is_function_over == 1){is_function_over = 0; ret_type = I;} else if(ret_type != I){ yyerror("INVALID RETURN TYPE");}}
