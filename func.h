@@ -1,6 +1,6 @@
-#ifndef SYMBOL_TABLE_H_
+#ifndef FUNC_H
 
-#define SYMBOL_TABLE_H
+#define FUNC_H
 
 #include "symboltable.h"
 
