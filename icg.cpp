@@ -1,14 +1,26 @@
 #include "icg.h"
 #include <fstream>
+#include <string>
+
+int is_declaration = 0;
+int is_loop = 0;
+int is_func = 0;
+int func_type;
+int param_list[10];
+int p_idx = 0;
+int p = 0;
+int rhs = 0;
+int nextinstr = 0;
+int temp_var_number = 0;
+vector<string> ICG;
 
 using namespace std;
-
 
 void gencode(string x)
 {
     std::string instruction;
 
-    instruction = to_string(nextinstr) + string(": ") + x;
+    instruction = std::to_string(nextinstr) + string(": ") + x;
     ICG.push_back(instruction);
     nextinstr++;
 }
@@ -20,7 +32,7 @@ void gencode_rel(content_t *&lhs, content_t *arg1, content_t *arg2, const string
     lhs->truelist = {nextinstr};
     lhs->falselist = {nextinstr + 1};
 
-    std::string code;
+    string code;
 
     code = string("if ") + arg1->addr + op + arg2->addr + string(" goto _");
     gencode(code);
@@ -31,7 +43,7 @@ void gencode_rel(content_t *&lhs, content_t *arg1, content_t *arg2, const string
 
 void gencode_math(content_t *&lhs, content_t *arg1, content_t *arg2, const string &op)
 {
-    lhs->addr = "t" + to_string(temp_var_number);
+    lhs->addr = "t" + std::to_string(temp_var_number);
     std::string expr = lhs->addr + string(" = ") + arg1->addr + op + arg2->addr;
     lhs->code = arg1->code + arg2->code + expr;
 
@@ -48,7 +60,7 @@ void backpatch(vector<int> &v1, int number)
 
         if (instruction.find("_") < instruction.size())
         {
-            instruction.replace(instruction.find("_"), 1, to_string(number));
+            instruction.replace(instruction.find("_"), 1, std::to_string(number));
             ICG[v1[i]] = instruction;
         }
     }
@@ -76,9 +88,9 @@ void displayICG()
     outfile.close();
 }
 
-void printlist(vector<int> v)
-{
-    for (auto it : v)
-        cout << it << " ";
-    cout << "Next: " << nextinstr << endl;
-}
+// void printlist(vector<int> v)
+// {
+//     for (auto it : v)
+//         cout << it << " ";
+//     cout << "Next: " << nextinstr << endl;
+// }

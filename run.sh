@@ -1,4 +1,4 @@
 #!/bin/bash
 bison -yd  minic.y --verbose
 flex minic.l
-gcc  y.tab.c symboltable.c
+g++  -std=c++11 y.tab.c symboltable.c icg.cpp

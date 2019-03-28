@@ -1,7 +1,11 @@
 %{
 	#include "symboltable.h"
-	
-	void yyerror(char *);
+	#include "icg.h"
+	#include<iostream>
+
+	using namespace std;
+
+	void yyerror(string);
 
 	struct exp {
 		int type; 
@@ -24,6 +28,12 @@
 		if(a>b)
 			return a;
 		return b;
+	}
+
+	string S(char * str)
+	{
+		string temp(str); 
+		return temp;
 	}
 
 	void id_present(char * id)
@@ -243,16 +253,16 @@ function_call: identifier PUN_BO untyped_parameterlist PUN_BC 	{id_present($1); 
 identifier: ID												{$$ = strdup($1);}
 		;
 
-untyped_parameterlist: identifier							{parameter_list = add_parameter(parameter_list, "P", type_get($1));}
-		| CONSTANT_INT										{parameter_list = add_parameter(parameter_list, "P", I);}
-		| CONSTANT_CHAR										{parameter_list = add_parameter(parameter_list, "P", CH);}
-		| CONSTANT_STR										{parameter_list = add_parameter(parameter_list, "P", CH * CH);}
-		| point_exp											{parameter_list = add_parameter(parameter_list, "P", $1);}
-		| untyped_parameterlist PUN_COM identifier			{parameter_list = add_parameter(parameter_list, "P", type_get($3));}
-		| untyped_parameterlist PUN_COM CONSTANT_INT		{parameter_list = add_parameter(parameter_list, "P", I);}
-		| untyped_parameterlist PUN_COM CONSTANT_CHAR		{parameter_list = add_parameter(parameter_list, "P", CH);}
-		| untyped_parameterlist PUN_COM CONSTANT_STR		{parameter_list = add_parameter(parameter_list, "P", CH * CH);}
-		| untyped_parameterlist PUN_COM point_exp			{parameter_list = add_parameter(parameter_list, "P", $3);}
+untyped_parameterlist: identifier							{parameter_list = add_parameter(parameter_list, (char *)"P", type_get($1));}
+		| CONSTANT_INT										{parameter_list = add_parameter(parameter_list, (char *)"P", I);}
+		| CONSTANT_CHAR										{parameter_list = add_parameter(parameter_list, (char *)"P", CH);}
+		| CONSTANT_STR										{parameter_list = add_parameter(parameter_list, (char *)"P", CH * CH);}
+		| point_exp											{parameter_list = add_parameter(parameter_list, (char *)"P", $1);}
+		| untyped_parameterlist PUN_COM identifier			{parameter_list = add_parameter(parameter_list, (char *)"P", type_get($3));}
+		| untyped_parameterlist PUN_COM CONSTANT_INT		{parameter_list = add_parameter(parameter_list, (char *)"P", I);}
+		| untyped_parameterlist PUN_COM CONSTANT_CHAR		{parameter_list = add_parameter(parameter_list, (char *)"P", CH);}
+		| untyped_parameterlist PUN_COM CONSTANT_STR		{parameter_list = add_parameter(parameter_list, (char *)"P", CH * CH);}
+		| untyped_parameterlist PUN_COM point_exp			{parameter_list = add_parameter(parameter_list, (char *)"P", $3);}
 		;
 
 function_definition: type identifier function_defn_parameters SEMICOLON	{ DT = add_to_defn(DT, $2, parameter_list); parameter_list = NULL;}
@@ -265,11 +275,22 @@ function_defn_parameters: functionparameters
 typeparalist: PUN_BO type_list PUN_BC
 		;
 
-type_list: type									{parameter_list = add_parameter(parameter_list, "P", $1);}
-		| type_list PUN_COM type				{parameter_list = add_parameter(parameter_list, "P", $3);}
+type_list: type									{parameter_list = add_parameter(parameter_list, (char *)"P", $1);}
+		| type_list PUN_COM type				{parameter_list = add_parameter(parameter_list, (char *)"P", $3);}
 		;
 
-function_start: type identifier functionparameters 	{scope = max(max_scope, scope) + 1; int i = parameter_to_symtable(table, parameter_list, scope + 1); insert_func(table, strdup($2), FUNCTION * $1, -1, i, parameter_list); parameter_list = NULL; $$ = $1;} 
+function_start: type identifier functionparameters 	{
+														scope = max(max_scope, scope) + 1; int i = parameter_to_symtable(table, parameter_list, scope + 1); 
+														insert_func(table, strdup($2), FUNCTION * $1, -1, i, parameter_list); 
+														gencode(S($2) + ":");
+														while(parameter_list != NULL)
+														{
+															gencode("arg" + S(parameter_list->id));
+															parameter_list = parameter_list->next;
+														}
+														parameter_list = NULL; 
+														$$ = $1;	
+													} 
 		;
 
 function: function_start scoped_statements			{if((is_function_over == 0 && $1 != ret_type) || (is_function_over == 1 && $1 != VO)){printf("%d", $1); yyerror("INVAID RETURN TYPE");} is_function_over = 1;}
@@ -350,7 +371,7 @@ while:	WHILE PUN_BO exp PUN_BC scoped_unscoped_statements
 
 #include "lex.yy.c"
 
-void yyerror (char *s) {fprintf (stderr, "Line %d: %s\n", lineno, s);} 
+void yyerror (string s) { cerr << "Line :" << lineno << ":" << s << endl;} 
 
 int main (int argc, char * argv[]) {
 	table = init();
