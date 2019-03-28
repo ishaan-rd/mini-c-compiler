@@ -11,6 +11,7 @@
 		int type; 
 		int val;
 		char * code;
+		char * expr;
 	};
 
 	symtable ** table = NULL;
@@ -238,6 +239,13 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
 																gencode_math($$.code, $1.code, "&&", $3.code);
+																int len = strlen($1.expr) + strlen($3.expr) + strlen("&&") + 1; 
+																char * instruction = (char *)malloc(sizeof(char) * len);
+																instruction[0] = '\0';
+																strcat(instruction, $1.expr);
+																strcat(instruction, "&&");
+																strcat(instruction, $3.expr);
+																$$.expr = instruction;
 															}
 		| arithmetic_exp OP_OR arithmetic_exp				{  
 																$$.type = I; check_type_arith($1.type, $3.type); 
@@ -245,6 +253,13 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
 																gencode_math($$.code, $1.code, "||", $3.code);
+																int len = strlen($1.expr) + strlen($3.expr) + strlen("||") + 1; 
+																char * instruction = (char *)malloc(sizeof(char) * len);
+																instruction[0] = '\0';
+																strcat(instruction, $1.expr);
+																strcat(instruction, "||");
+																strcat(instruction, $3.expr);
+																$$.expr = instruction;
 															}
 		| arithmetic_exp OP_LT arithmetic_exp				{  
 																$$.type = I; check_type_arith($1.type, $3.type);  
@@ -252,6 +267,13 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
 																gencode_math($$.code, $1.code, "<", $3.code);
+																int len = strlen($1.expr) + strlen($3.expr) + strlen("<") + 1; 
+																char * instruction = (char *)malloc(sizeof(char) * len);
+																instruction[0] = '\0';
+																strcat(instruction, $1.expr);
+																strcat(instruction, "<");
+																strcat(instruction, $3.expr);
+																$$.expr = instruction;
 															}
 		| arithmetic_exp OP_GT arithmetic_exp				{  
 																$$.type = I; check_type_arith($1.type, $3.type);  
@@ -259,6 +281,13 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
 																gencode_math($$.code, $1.code, ">", $3.code);
+																int len = strlen($1.expr) + strlen($3.expr) + strlen(">") + 1; 
+																char * instruction = (char *)malloc(sizeof(char) * len);
+																instruction[0] = '\0';
+																strcat(instruction, $1.expr);
+																strcat(instruction, ">");
+																strcat(instruction, $3.expr);
+																$$.expr = instruction;
 															}
 		| arithmetic_exp OP_LE arithmetic_exp				{  
 																$$.type = I; check_type_arith($1.type, $3.type);  
@@ -266,6 +295,13 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
 																gencode_math($$.code, $1.code, "<=", $3.code);
+																int len = strlen($1.expr) + strlen($3.expr) + strlen("<=") + 1; 
+																char * instruction = (char *)malloc(sizeof(char) * len);
+																instruction[0] = '\0';
+																strcat(instruction, $1.expr);
+																strcat(instruction, "<=");
+																strcat(instruction, $3.expr);
+																$$.expr = instruction;
 															}
 		| arithmetic_exp OP_GE arithmetic_exp				{  
 																$$.type = I; check_type_arith($1.type, $3.type);  
@@ -273,6 +309,13 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
 																gencode_math($$.code, $1.code, ">=", $3.code);
+																int len = strlen($1.expr) + strlen($3.expr) + strlen(">=") + 1; 
+																char * instruction = (char *)malloc(sizeof(char) * len);
+																instruction[0] = '\0';
+																strcat(instruction, $1.expr);
+																strcat(instruction, ">=");
+																strcat(instruction, $3.expr);
+																$$.expr = instruction;
 															}
 		| arithmetic_exp OP_EE arithmetic_exp				{  
 																$$.type = I; check_type_arith($1.type, $3.type);  
@@ -280,6 +323,13 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
 																gencode_math($$.code, $1.code, "==", $3.code);
+																int len = strlen($1.expr) + strlen($3.expr) + strlen("==") + 1; 
+																char * instruction = (char *)malloc(sizeof(char) * len);
+																instruction[0] = '\0';
+																strcat(instruction, $1.expr);
+																strcat(instruction, "==");
+																strcat(instruction, $3.expr);
+																$$.expr = instruction;
 															}
 		| arithmetic_exp OP_SUB arithmetic_exp				{  
 																$$.type = I; check_type_arith($1.type, $3.type);  
@@ -287,6 +337,13 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
 																gencode_math($$.code, $1.code, "-", $3.code);
+																int len = strlen($1.expr) + strlen($3.expr) + strlen("-") + 1; 
+																char * instruction = (char *)malloc(sizeof(char) * len);
+																instruction[0] = '\0';
+																strcat(instruction, $1.expr);
+																strcat(instruction, "-");
+																strcat(instruction, $3.expr);
+																$$.expr = instruction;
 															}
 		| arithmetic_exp OP_ADD arithmetic_exp				{   
 																$$.type = I; check_type_arith($1.type, $3.type);   
@@ -294,6 +351,13 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char)); strcpy($$.code, t);
 																gencode_math($$.code, $1.code, "+", $3.code); 
+																int len = strlen($1.expr) + strlen($3.expr) + strlen("+") + 1; 
+																char * instruction = (char *)malloc(sizeof(char) * len);
+																instruction[0] = '\0';
+																strcat(instruction, $1.expr);
+																strcat(instruction, "+");
+																strcat(instruction, $3.expr);
+																$$.expr = instruction;
 															}
 		| arithmetic_exp OP_MUL arithmetic_exp				{   
 																$$.type = I; check_type_arith($1.type, $3.type);   
@@ -301,6 +365,13 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
 																gencode_math($$.code, $1.code, "*", $3.code); 
+																int len = strlen($1.expr) + strlen($3.expr) + strlen("*") + 1; 
+																char * instruction = (char *)malloc(sizeof(char) * len);
+																instruction[0] = '\0';
+																strcat(instruction, $1.expr);
+																strcat(instruction, "*");
+																strcat(instruction, $3.expr);
+																$$.expr = instruction;
 															}
 		| arithmetic_exp OP_DIV arithmetic_exp				{   
 																$$.type = I; check_type_arith($1.type, $3.type);   
@@ -308,6 +379,13 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
 																gencode_math($$.code, $1.code, "/", $3.code); 
+																int len = strlen($1.expr) + strlen($3.expr) + strlen("/") + 1; 
+																char * instruction = (char *)malloc(sizeof(char) * len);
+																instruction[0] = '\0';
+																strcat(instruction, $1.expr);
+																strcat(instruction, "/");
+																strcat(instruction, $3.expr);
+																$$.expr = instruction;
 															}
 		| arithmetic_exp OP_MOD arithmetic_exp				{   
 																$$.type = I; check_type_arith($1.type, $3.type);   
@@ -315,6 +393,13 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
 																gencode_math($$.code, $1.code, "%", $3.code);
+																int len = strlen($1.expr) + strlen($3.expr) + strlen("%") + 1; 
+																char * instruction = (char *)malloc(sizeof(char) * len);
+																instruction[0] = '\0';
+																strcat(instruction, $1.expr);
+																strcat(instruction, "%");
+																strcat(instruction, $3.expr);
+																$$.expr = instruction;
 															}
 		| OP_SUB arithmetic_exp %prec UMINUS				{   
 																$$.type = I; check_type_arith(I, $2.type);   
@@ -322,6 +407,11 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
 																gencode_math($$.code, "", "-", $2.code);
+																int len = strlen("1") + 1; 
+																char * instruction = (char *)malloc(sizeof(char) * len);
+																instruction[0] = '\0';
+																strcat(instruction, "1");
+																$$.expr = instruction;
 															}
 		| OP_ADD arithmetic_exp %prec UMINUS				{   
 																$$.type = I; check_type_arith(I, $2.type); 
@@ -329,6 +419,11 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
 																gencode_math($$.code, "", "+", $2.code);
+																int len = strlen("1") + 1; 
+																char * instruction = (char *)malloc(sizeof(char) * len);
+																instruction[0] = '\0';
+																strcat(instruction, "1");
+																$$.expr = instruction;
 															}
 		| PUN_BO arithmetic_exp PUN_BC						{   
 																$$.type = I; check_type_arith(I, $2.type); 
@@ -336,12 +431,20 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
 																gencode_math($$.code, "(", $2.code, ")");
+																int len = strlen("(") + strlen(")") + strlen($2.expr) + 1; 
+																char * instruction = (char *)malloc(sizeof(char) * len);
+																instruction[0] = '\0';
+																strcat(instruction, "(");
+																strcat(instruction, $2.expr);
+																strcat(instruction, ")");
+																$$.expr = instruction;
 															}
 		| identifier										{ 
 																id_present($1); $$.type = type_get($1); $$.val = 2;
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t); 
 																gencode( S($$.code) + " = " + S($1));
+																$$.expr = $$.code;
 															}
 		| CONSTANT_INT										{ 
 																$$.type = I; 
@@ -349,6 +452,7 @@ arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{
 																const char * t = generateTemp();
 																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t); 
 																gencode( S($$.code) + " = " + S($1));
+																$$.expr = $$.code;
 															}
 		;
 
@@ -604,9 +708,24 @@ scoped_unscoped_statements: scoped_statements	{}
 		| statement
 		;
 
-if:		IF PUN_BO arithmetic_exp PUN_BC scoped_unscoped_statements %prec LOWER_THAN_ELSE
-		|IF PUN_BO arithmetic_exp PUN_BC scoped_unscoped_statements ELSE scoped_unscoped_statements
-    	;
+
+if_start: IF PUN_BO arithmetic_exp PUN_BC
+		;
+
+if:	if_start scoped_unscoped_statements %prec LOWER_THAN_ELSE 
+												{
+													
+												}
+	|if_start scoped_unscoped_statements else
+												{
+
+												}
+	;
+
+else: ELSE scoped_unscoped_statements
+												{
+
+												}
 
 
 for:	FOR PUN_BO for_exp for_exp arithmetic_exp PUN_BC scoped_unscoped_statements	
