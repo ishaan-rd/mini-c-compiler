@@ -10,6 +10,7 @@
 	struct exp {
 		int type; 
 		int val;
+		char * code;
 	};
 
 	symtable ** table = NULL;
@@ -30,12 +31,28 @@
 		return b;
 	}
 
-	string S(char * str)
+	string S(char *str)
 	{
-		string temp(str); 
+		string temp(str);
 		return temp;
 	}
 
+	string S(const char *str)
+	{
+		string temp(str);
+		return temp;
+	}
+
+	string S(string x)
+	{
+		return x;
+	}
+
+	string S(int x)
+	{
+		string temp = std::to_string(x);
+		return temp;
+	}
 	void id_present(char * id)
 	{
  		if(is_present(table, id, scope)==-1)
@@ -192,23 +209,124 @@ exp:	arithmetic_exp
 		| assignment_exp
 		;
 
-arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val && $3.val;}
-		| arithmetic_exp OP_OR arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val || $3.val;}
-		| arithmetic_exp OP_LT arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val < $3.val;}
-		| arithmetic_exp OP_GT arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val > $3.val;}
-		| arithmetic_exp OP_LE arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val <= $3.val;}
-		| arithmetic_exp OP_GE arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val >= $3.val;}
-		| arithmetic_exp OP_EE arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val == $3.val;}
-		| arithmetic_exp OP_SUB arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val - $3.val;}
-		| arithmetic_exp OP_ADD arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val + $3.val;}
-		| arithmetic_exp OP_MUL arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val * $3.val;}
-		| arithmetic_exp OP_DIV arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val / $3.val;}
-		| arithmetic_exp OP_MOD arithmetic_exp				{ $$.type = I; check_type_arith($1.type, $3.type); $$.val = $1.val % $3.val;}
-		| OP_SUB arithmetic_exp %prec UMINUS				{ $$.type = I; check_type_arith(I, $2.type); $$.val = -$2.val;}
-		| OP_ADD arithmetic_exp %prec UMINUS				{ $$.type = I; check_type_arith(I, $2.type); $$.val = +$2.val;}
-		| PUN_BO arithmetic_exp PUN_BC						{ $$.type = I; check_type_arith(I, $2.type); $$.val = ($2.val);}
-		| identifier										{ id_present($1); $$.type = type_get($1); $$.type = type_get($1); $$.val = 2;}
-		| CONSTANT_INT										{ $$.type = I; $$.val = $1;}
+arithmetic_exp: arithmetic_exp OP_AND arithmetic_exp	   	{ 
+																$$.type = I; check_type_arith($1.type, $3.type); 
+																$$.val = $1.val && $3.val;
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
+																gencode_math($$.code, $1.code, "&&", $3.code);
+															}
+		| arithmetic_exp OP_OR arithmetic_exp				{  
+																$$.type = I; check_type_arith($1.type, $3.type); 
+																$$.val = $1.val || $3.val; 
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
+																gencode_math($$.code, $1.code, "||", $3.code);
+															}
+		| arithmetic_exp OP_LT arithmetic_exp				{  
+																$$.type = I; check_type_arith($1.type, $3.type);  
+																$$.val = $1.val < $3.val; 
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
+																gencode_math($$.code, $1.code, "<", $3.code);
+															}
+		| arithmetic_exp OP_GT arithmetic_exp				{  
+																$$.type = I; check_type_arith($1.type, $3.type);  
+																$$.val = $1.val > $3.val; 
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
+																gencode_math($$.code, $1.code, ">", $3.code);
+															}
+		| arithmetic_exp OP_LE arithmetic_exp				{  
+																$$.type = I; check_type_arith($1.type, $3.type);  
+																$$.val = $1.val <= $3.val; 
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
+																gencode_math($$.code, $1.code, "<=", $3.code);
+															}
+		| arithmetic_exp OP_GE arithmetic_exp				{  
+																$$.type = I; check_type_arith($1.type, $3.type);  
+																$$.val = $1.val >= $3.val; 
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
+																gencode_math($$.code, $1.code, ">=", $3.code);
+															}
+		| arithmetic_exp OP_EE arithmetic_exp				{  
+																$$.type = I; check_type_arith($1.type, $3.type);  
+																$$.val = $1.val == $3.val; 
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
+																gencode_math($$.code, $1.code, "==", $3.code);
+															}
+		| arithmetic_exp OP_SUB arithmetic_exp				{  
+																$$.type = I; check_type_arith($1.type, $3.type);  
+																$$.val = $1.val - $3.val; 
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
+																gencode_math($$.code, $1.code, "-", $3.code);
+															}
+		| arithmetic_exp OP_ADD arithmetic_exp				{   
+																$$.type = I; check_type_arith($1.type, $3.type);   
+																$$.val = $1.val + $3.val; 
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char)); strcpy($$.code, t);
+																gencode_math($$.code, $1.code, "+", $3.code); 
+															}
+		| arithmetic_exp OP_MUL arithmetic_exp				{   
+																$$.type = I; check_type_arith($1.type, $3.type);   
+																$$.val = $1.val * $3.val;
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
+																gencode_math($$.code, $1.code, "*", $3.code); 
+															}
+		| arithmetic_exp OP_DIV arithmetic_exp				{   
+																$$.type = I; check_type_arith($1.type, $3.type);   
+																$$.val = $1.val / $3.val;	
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
+																gencode_math($$.code, $1.code, "/", $3.code); 
+															}
+		| arithmetic_exp OP_MOD arithmetic_exp				{   
+																$$.type = I; check_type_arith($1.type, $3.type);   
+																$$.val = $1.val % $3.val;
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
+																gencode_math($$.code, $1.code, "%", $3.code);
+															}
+		| OP_SUB arithmetic_exp %prec UMINUS				{   
+																$$.type = I; check_type_arith(I, $2.type);   
+																$$.val = -$2.val;
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
+																gencode_math($$.code, "", "-", $2.code);
+															}
+		| OP_ADD arithmetic_exp %prec UMINUS				{   
+																$$.type = I; check_type_arith(I, $2.type); 
+																$$.val = +$2.val;
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
+																gencode_math($$.code, "", "+", $2.code);
+															}
+		| PUN_BO arithmetic_exp PUN_BC						{   
+																$$.type = I; check_type_arith(I, $2.type); 
+																$$.val = ($2.val);
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t);
+																gencode_math($$.code, "(", $2.code, ")");
+															}
+		| identifier										{ 
+																id_present($1); $$.type = type_get($1); $$.val = 2;
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t); 
+																gencode( S($$.code) + " = " + S($1));
+															}
+		| CONSTANT_INT										{ 
+																$$.type = I; 
+																$$.val = $1; 
+																const char * t = generateTemp();
+																$$.code = (char *)malloc((strlen(t)+1)*sizeof(char));strcpy($$.code, t); 
+																gencode( S($$.code) + " = " + S($1));
+															}
 		;
 
 assignment_exp:  identifier OP_ASS arithmetic_exp			{id_present($1); check_type($1, $3.type);}

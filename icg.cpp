@@ -1,4 +1,5 @@
 #include "icg.h"
+#include<string.h>
 #include <fstream>
 #include <string>
 
@@ -15,6 +16,22 @@ void gencode(string x)
     instruction = std::to_string(nextinstr) + string(": ") + x;
     ICG.push_back(instruction);
     nextinstr++;
+}
+
+void gencode_math(string left, string fi, string op, string se)
+{
+    std::string instruction;
+    instruction = left + " = " + fi + " " + op + " " + se;
+    gencode(instruction);
+}
+
+const char * generateTemp(){
+    string temp = "t" + std::to_string(temp_var_number);
+    temp_var_number++;
+    return temp.c_str();
+    // char *cstr = new char[temp.length() + 1];
+    // strcpy(cstr, );
+    // return cstr;
 }
 
 // void gencode_rel(content_t *&lhs, content_t *arg1, content_t *arg2, const string &op)
@@ -70,7 +87,7 @@ void gencode(string x)
 
 void displayICG()
 {
-    ofstream outfile("ICG.code");
+    ofstream outfile("icg.code");
 
     for (int i = 0; i < ICG.size(); i++)
         outfile << ICG[i] << endl;
