@@ -68,7 +68,8 @@
 	string S(char c)
 	{
 		char * temp = new char(2);
-		temp[1] = c;
+		temp[0] = c;
+		temp[1] = '\0';
 		string x(temp);
 		return x;
 	}
@@ -363,7 +364,11 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{
 		| identifier OP_ASS CONSTANT_CHAR					{
 																id_present($1); 
 																check_type($1, CH);
-																gencode_math(S($1), S($3), "", "");
+																const char * t1 = generateTemp();
+																char * temp = (char *)malloc((strlen(t1) + 1) * sizeof(char));
+																strcpy(temp, t1);
+																gencode_math(S(temp), S($3), "", "");
+																gencode_math(S($1), S(temp), "", "");
 															}
 		| identifier OP_ASS function_call					{
 																id_present($1); 
@@ -373,8 +378,10 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{
 																id_present($1); 
 																id_present($4); int x =  type_get($4); check_type($1, x * x);
 																const char * t1 = generateTemp();
-																gencode(S(t1) + " = addr(" + S($4) + ")");
-																gencode(S($1) + " = " + S(t1));
+																char * temp = (char *)malloc((strlen(t1) + 1) * sizeof(char));
+																strcpy(temp, t1);
+																gencode(S(temp) + " = addr(" + S($4) + ")");
+																gencode(S($1) + " = " + S(temp));
 															}
 		| identifier OP_ASS identifier PUN_SQO arithmetic_exp PUN_SQC  { 
 																id_present($1); id_present($3);
@@ -388,39 +395,59 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{
 																int x = type_get($1); 
 																check_type($3, x * x);
 																const char * t1 = generateTemp();
-																gencode(S(t1) + " = addr(" + S($3) + ")");
-																gencode(S($1) + " = " + S(t1) + "[" + S($5.code) + "]");
+																char * temp = (char *)malloc((strlen(t1) + 1) * sizeof(char));
+																strcpy(temp, t1);
+																gencode(S(temp) + " = addr(" + S($3) + ")");
+																gencode(S($1) + " = " + S(temp) + "[" + S($5.code) + "]");
 															}
 		| identifier OP_ASS point_exp						{
 																id_present($1);
 																check_type($1, $3.type);
 																int x = $3.val;
-																char * t = (char *)generateTemp();
-																string prev;
-																prev = S(t);
-																gencode(prev + " = *" + $3.code);
-
-																while(x-2)
+																const char * t = generateTemp();
+																char * tempPrev = (char *)malloc((strlen($3.code) + 1) * sizeof(char));
+																strcpy(tempPrev, $3.code);
+																char * temp = (char *)malloc((strlen(t) + 1) * sizeof(char));
+																strcpy(temp, t);
+																gencode(S(temp) + " = *" + S(tempPrev));
+																while(x-1)
 																{
-																	t = (char *)generateTemp();
-																	gencode(S(t) + " = *" + prev);
-																	prev = S(t);
+																	const char * t = generateTemp();
+																	temp = (char *)malloc((strlen(t) + 1) * sizeof(char));
+																	strcpy(temp, t);
+																	gencode(S(temp) + " = *" + S(tempPrev));
+																	tempPrev = (char *)malloc((strlen(temp) + 1) * sizeof(char));
+																	strcpy(tempPrev, temp);
 																	x--;
 																}
-																gencode(S($1) + " = *" + prev);
+																gencode(S($1) + " = " + S(temp));
 															}
 		| identifier OP_INC									{
 																id_present($1); 
 																check_type($1, I);
 																const char * t1 = generateTemp();
-																gencode(S(t1) + " = " + S($1) + " + 1");
-																gencode(S($1) + " = " + S(t1));
+																char * temp = (char *)malloc((strlen(t1) + 1) * sizeof(char));
+																strcpy(temp, t1);
+																gencode(S(t1) + " = " + S($1));
+																const char * t2 = generateTemp();
+																char * temp2 = (char *)malloc((strlen(t2) + 1) * sizeof(char));
+																strcpy(temp2, t2);
+																gencode(S(t2) + " = " + "1");
+																gencode(S(t1) + " = " + S(temp2);
+																gencode(S($1) + " = " + S(temp) + " + " + S(temp2));
 															}
 		| identifier OP_DEC									{
 																id_present($1); check_type($1, I);
 																const char * t1 = generateTemp();
-																gencode(S(t1) + " = " + S($1) + " - 1");
-																gencode(S($1) + " = " + S(t1));
+																char * temp = (char *)malloc((strlen(t1) + 1) * sizeof(char));
+																strcpy(temp, t1);
+																gencode(S(t1) + " = " + S($1));
+																const char * t2 = generateTemp();
+																char * temp2 = (char *)malloc((strlen(t2) + 1) * sizeof(char));
+																strcpy(temp2, t2);
+																gencode(S(t2) + " = " + "1");
+																gencode(S(t1) + " = " + S(temp2);
+																gencode(S($1) + " = " + S(temp) + " - " + S(temp2));
 															}
 		| identifier PUN_SQO arithmetic_exp PUN_SQC OP_ASS arithmetic_exp { 
 																id_present($1); 
@@ -553,10 +580,29 @@ delarationlist:
 
 declare: identifier								{ insert(table, $1, current_dt, scope); }
 		| identifier PUN_SQO arithmetic_exp PUN_SQC		{ if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");} insertArray(table, $1, current_dt * current_dt, $3.val, scope);}
-		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3);}
-		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, $3.type);}
-		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, scope); int x = type_get($4); check_both_type(current_dt, x*x);}
-		| identifier OP_ASS CONSTANT_CHAR		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, CH);}
+		| identifier OP_ASS function_call		{ 
+													insert(table, $1, current_dt, scope); check_both_type(current_dt, $3);
+												}
+		| identifier OP_ASS arithmetic_exp		{ 
+													insert(table, $1, current_dt, scope); check_both_type(current_dt, $3.type);
+													gencode_math(S($1), S($3.code), "", "");
+												}
+		| identifier OP_ASS OP_ADR identifier	{ 
+													insert(table, $1, current_dt, scope); int x = type_get($4); check_both_type(current_dt, x*x);
+													const char * t1 = generateTemp();
+													char * temp = (char *)malloc((strlen(t1) + 1) * sizeof(char));
+													strcpy(temp, t1);
+													gencode(S(temp) + " = addr(" + S($4) + ")");
+													gencode(S($1) + " = " + S(temp));
+												}
+		| identifier OP_ASS CONSTANT_CHAR		{ 
+													insert(table, $1, current_dt, scope); check_both_type(current_dt, CH);
+													const char * t1 = generateTemp();
+													char * temp = (char *)malloc((strlen(t1) + 1) * sizeof(char));
+													strcpy(temp, t1);													
+													gencode_math(S(temp), S($3), "", "");
+													gencode_math(S($1), S(temp), "", "");
+												}
 		;
 
 scoped_unscoped_statements: scoped_statements	{}
