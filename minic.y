@@ -36,7 +36,7 @@
 
 	int floorSqrt(int x) 
 	{ 
-		// Base cases 
+		// Base cases
 		if (x == 0 || x == 1) 
 		return x; 
 	
@@ -132,6 +132,7 @@
 
 	vector<int>v;
 	vector<int>for_start;
+	vector<char *> parameterss;
 %}
 
 
@@ -589,23 +590,58 @@ point_exp: OP_MUL identifier								{
 															}
 		;
 
-function_call: identifier PUN_BO untyped_parameterlist PUN_BC 	{id_present($1); $$ = type_get_fc($1); check_params(table, $1, parameter_list); parameter_list = NULL;}
-		| identifier PUN_BO PUN_BC							{id_present($1); $$ = type_get_fc($1); check_params(table, $1, parameter_list); parameter_list = NULL;}
+function_call: identifier PUN_BO untyped_parameterlist PUN_BC 	{
+																	id_present($1); $$ = type_get_fc($1); check_params(table, $1, parameter_list); parameter_list = NULL;
+																	int len = 0;
+																	int i;
+																	for(i=0; i < parameterss.size(); i++)
+																	{
+																		len += 1 + strlen(parameterss[i]);
+																	}
+																	len += strlen($1) + 1;
+																	len++;
+																	char * parameter = (char *)malloc(sizeof(char)*len);
+																	parameter[0] = '\0';
+																	strcat(parameter, $1);
+																	strcat(parameter, "(");
+																	for(i=0; i < parameterss.size(); i++)
+																	{
+																		strcat(parameter, parameterss[i]);
+																		if(i == parameterss.size()-1)
+																			strcat(parameter, ")");
+																		else
+																			strcat(parameter, ",")
+																	}
+																	parameterss.clear();
+																	parameterss.push_back(parameter);				
+																}
+		| identifier PUN_BO PUN_BC							{id_present($1); $$ = type_get_fc($1); check_params(table, $1, parameter_list); parameter_list = NULL;
+															
+																int len = 0;
+																len += strlen($1) + 2;
+																len++;
+																strcat(parameter, $1);
+																strcat(parameter, "2");	
+																parameterss.clear();
+																parameterss.push_back(parameter);												
+															}
 		;
 
 identifier: ID												{$$ = strdup($1);}
 		;
 
-untyped_parameterlist: identifier							{parameter_list = add_parameter(parameter_list, (char *)"P", type_get($1));}
-		| CONSTANT_INT										{parameter_list = add_parameter(parameter_list, (char *)"P", I);}
-		| CONSTANT_CHAR										{parameter_list = add_parameter(parameter_list, (char *)"P", CH);}
-		| CONSTANT_STR										{parameter_list = add_parameter(parameter_list, (char *)"P", CH * CH);}
-		| point_exp											{parameter_list = add_parameter(parameter_list, (char *)"P", $1.type);}
-		| untyped_parameterlist PUN_COM identifier			{parameter_list = add_parameter(parameter_list, (char *)"P", type_get($3));}
-		| untyped_parameterlist PUN_COM CONSTANT_INT		{parameter_list = add_parameter(parameter_list, (char *)"P", I);}
-		| untyped_parameterlist PUN_COM CONSTANT_CHAR		{parameter_list = add_parameter(parameter_list, (char *)"P", CH);}
-		| untyped_parameterlist PUN_COM CONSTANT_STR		{parameter_list = add_parameter(parameter_list, (char *)"P", CH * CH);}
-		| untyped_parameterlist PUN_COM point_exp			{parameter_list = add_parameter(parameter_list, (char *)"P", $3.type);}
+untyped_parameterlist: arithmetic_exp						{
+																parameter_list = add_parameter(parameter_list, (char *)"P", $1.type);
+																char * parameter = (char *)malloc(sizeof(char)*(strlen($1.code) + 1));
+																strcpy(parameter, $1.code);
+																parameterss.push_back(parameter);
+															}
+		| untyped_parameterlist PUN_COM arithmetic_exp		{
+																parameter_list = add_parameter(parameter_list, (char *)"P", $3.type);
+																char * parameter = (char *)malloc(sizeof(char)*(strlen($3.code) + 1));
+																strcpy(parameter, $3.code);
+																parameterss.push_back(parameter);
+															}
 		;
 
 function_definition: type identifier function_defn_parameters SEMICOLON	{ DT = add_to_defn(DT, $2, parameter_list); parameter_list = NULL;}
@@ -685,6 +721,7 @@ declare: identifier								{ insert(table, $1, current_dt, scope); }
 		| identifier PUN_SQO arithmetic_exp PUN_SQC		{ if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");} insertArray(table, $1, current_dt * current_dt, $3.val, scope);}
 		| identifier OP_ASS function_call		{ 
 													insert(table, $1, current_dt, scope); check_both_type(current_dt, $3);
+													gencode(S($1))
 												}
 		| identifier OP_ASS arithmetic_exp		{ 
 													insert(table, $1, current_dt, scope); check_both_type(current_dt, $3.type);
