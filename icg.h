@@ -14,6 +14,14 @@ void displayICG();
 
 int line_no();
 
+void back_track(vector<int> &x, int line_no);
+
+void addToBuffer();
+
+void stopBuffer();
+
+void merge();
+
 const char *generateTemp();
 // void printlist(vector<int>);
 

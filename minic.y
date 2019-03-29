@@ -23,6 +23,8 @@
 	int max_scope = -100;
 	int ret_type = -100;
 	int is_function_over = 1;
+	int current_line;
+	int add_to_buffer = 0;
 	parameter * parameter_list = NULL;
 
 	int max(int a, int b)
@@ -129,7 +131,7 @@
 	}
 
 	vector<int>v;
-
+	vector<int>for_start;
 %}
 
 
@@ -712,33 +714,46 @@ scoped_unscoped_statements: scoped_statements	{}
 
 
 if_start: IF PUN_BO arithmetic_exp PUN_BC		{
-													gencode("if " + S($3.exp) + " goto ");
-													v.push_back(line_no());
+													gencode("if !" + S($3.expr) + " goto _:");
+													v.push_back(line_no()-1);
 												}
 		;
 
-if:	if_start scoped_unscoped_statements %prec LOWER_THAN_ELSE 
+if:	if_start scoped_unscoped_statements %prec LOWER_THAN_ELSE
 												{
-													back_track
+													back_track(v, line_no());
 												}
 	|if_start scoped_unscoped_statements else
 												{
-
+													back_track(v, line_no());
+													
 												}
 	;
 
 else: ELSE scoped_unscoped_statements
 												{
-
+													back_track(v, line_no());
+													gencode(" goto _:");
+													v.push_back(line_no()-1);
 												}
+	;
 
+for:for_start scoped_unscoped_statements 	{
+												merge();
+												int x = for_start.back();
+												for_start.pop_back();
+												gencode("goto " + S(x) + ":");
+												back_track(v, line_no());												
+											}
+	;
 
-for:	FOR PUN_BO for_exp for_exp arithmetic_exp PUN_BC scoped_unscoped_statements	
-		|FOR PUN_BO for_exp for_exp PUN_BC scoped_unscoped_statements
-		;
-
-for_exp: arithmetic_exp SEMICOLON
-		| SEMICOLON
+for_start:	FOR PUN_BO assignment_exp SEMICOLON arithmetic_exp  SEMICOLON { addToBuffer(); } assignment_exp PUN_BC 
+												{
+													stopBuffer();
+													gencode("if !" + S($5.expr) + " goto _:");
+													v.push_back(line_no()-1);
+													for_start.push_back(line_no()-1);		
+												}
 		;
 
 %%

@@ -5,17 +5,42 @@
 
 int nextinstr = 0;
 int temp_var_number = 0;
+int toBuffer = 0;
 vector<string> ICG;
+vector<string> Buffer;
 
 using namespace std;
+
+void addToBuffer()
+{
+    toBuffer = 1;
+}
+
+void stopBuffer()
+{
+    toBuffer = 0;
+}
+
+void merge()
+{
+    for (int i = 0; i < Buffer.size(); i++)
+    {
+        gencode(Buffer[i]);
+    }
+    Buffer.clear();
+}
 
 void gencode(string x)
 {
     std::string instruction;
 
     instruction = std::to_string(nextinstr) + string(": ") + x;
-    ICG.push_back(instruction);
-    nextinstr++;
+    if (!toBuffer){
+        ICG.push_back(instruction);
+        nextinstr++;
+    }
+    else
+        Buffer.push_back(x);
 }
 
 void gencode_math(string left, string fi, string op, string se)
@@ -32,9 +57,19 @@ const char *generateTemp()
     return temp.c_str();
 }
 
-void back_track(vector<int> x, int line_no)
+void back_track(vector<int> &x, int line_no)
 {
-    
+    for (int i = 0; i < x.size(); i++)
+    {
+        string instruction = ICG[x[i]];
+
+        if (instruction.find("_") < instruction.size())
+        {
+            instruction.replace(instruction.find("_"), 1, to_string(line_no));
+            ICG[x[i]] = instruction;
+        }
+    }
+    x.clear();
 }
 
 int line_no()
