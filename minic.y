@@ -232,7 +232,11 @@ gl_delarationlist:
 
 gl_declare: identifier								{ insert(table, $1, current_dt, -1); }
 		| identifier PUN_SQO arithmetic_exp PUN_SQC		{ if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");} insertArray(table, $1, current_dt * current_dt, $3.val, -1);}
-		| identifier OP_ASS function_call		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, $3);}
+		| identifier OP_ASS function_call		{ 
+													insert(table, $1, current_dt, -1); check_both_type(current_dt, $3);
+													gencode(S($1) + " = call " + S(parameterss[0]));
+													parameterss.clear();
+												}
 		| identifier OP_ASS arithmetic_exp		{ insert(table, $1, current_dt, -1); check_both_type(current_dt, $3.type);}
 		| identifier OP_ASS OP_ADR identifier	{ insert(table, $1, current_dt, -1); int x = type_get($4); check_both_type(current_dt, x*x);}
 		| identifier OP_ASS CONSTANT_CHAR		{ insert(table, $1, current_dt, scope); check_both_type(current_dt, CH);}
@@ -478,6 +482,8 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{
 		| identifier OP_ASS function_call					{
 																id_present($1); 
 																check_type($1, $3);
+																gencode(S($1) + " = call " + S(parameterss[0]));
+																parameterss.clear();
 															}
 		| identifier OP_ASS OP_ADR identifier				{
 																id_present($1); 
@@ -538,7 +544,6 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{
 																char * temp2 = (char *)malloc((strlen(t2) + 1) * sizeof(char));
 																strcpy(temp2, t2);
 																gencode(S(t2) + " = " + "1");
-																gencode(S(t1) + " = " + S(temp2));
 																gencode(S($1) + " = " + S(temp) + " + " + S(temp2));
 															}
 		| identifier OP_DEC									{
@@ -551,7 +556,6 @@ assignment_exp:  identifier OP_ASS arithmetic_exp			{
 																char * temp2 = (char *)malloc((strlen(t2) + 1) * sizeof(char));
 																strcpy(temp2, t2);
 																gencode(S(t2) + " = " + "1");
-																gencode(S(t1) + " = " + S(temp2));
 																gencode(S($1) + " = " + S(temp) + " - " + S(temp2));
 															}
 		| identifier PUN_SQO arithmetic_exp PUN_SQC OP_ASS arithmetic_exp { 
@@ -610,7 +614,7 @@ function_call: identifier PUN_BO untyped_parameterlist PUN_BC 	{
 																		if(i == parameterss.size()-1)
 																			strcat(parameter, ")");
 																		else
-																			strcat(parameter, ",")
+																			strcat(parameter, ",");
 																	}
 																	parameterss.clear();
 																	parameterss.push_back(parameter);				
@@ -620,6 +624,8 @@ function_call: identifier PUN_BO untyped_parameterlist PUN_BC 	{
 																int len = 0;
 																len += strlen($1) + 2;
 																len++;
+																char * parameter = (char *)malloc(sizeof(char)*len);
+																parameter[0] = '\0';
 																strcat(parameter, $1);
 																strcat(parameter, "2");	
 																parameterss.clear();
@@ -704,7 +710,10 @@ statement: if
 		| RETURN CONSTANT_INT SEMICOLON				{if(is_function_over == 1){is_function_over = 0; ret_type = I;} else if(ret_type != I){ yyerror("INVALID RETURN TYPE");}}
 		| CONTINUE SEMICOLON
 		| BREAK SEMICOLON
-		| function_call SEMICOLON
+		| function_call SEMICOLON					{
+														gencode("call " + S(parameterss[0]));
+														parameterss.clear();
+													}
 		| declaration
 		| assignment_list SEMICOLON
 		;
@@ -721,7 +730,8 @@ declare: identifier								{ insert(table, $1, current_dt, scope); }
 		| identifier PUN_SQO arithmetic_exp PUN_SQC		{ if($3.val <= 0 || $3.type != I){yyerror("Array size less than 1");} insertArray(table, $1, current_dt * current_dt, $3.val, scope);}
 		| identifier OP_ASS function_call		{ 
 													insert(table, $1, current_dt, scope); check_both_type(current_dt, $3);
-													gencode(S($1))
+													gencode(S($1) + " = call " + S(parameterss[0]));
+													parameterss.clear();
 												}
 		| identifier OP_ASS arithmetic_exp		{ 
 													insert(table, $1, current_dt, scope); check_both_type(current_dt, $3.type);
